@@ -1,0 +1,35 @@
+{
+  "name": "x2ts/x2ts",
+  "description": "The core of x2ts framework.",
+  "type": "library",
+  "license": "BSD",
+  "authors": [
+    {
+      "name": "TingSong-Syu",
+      "email": "rek@rek.me"
+    }
+  ],
+  "require": {
+    "roave/security-advisories": "dev-master",
+    "php": ">=7.0.0",
+    "ext-Reflection": ">=7.0.0",
+    "ext-PDO": ">=7.0.0",
+    "monolog/monolog": "^1.22.1",
+    "ext-mbstring": ">=7.0.0",
+    "ext-json": ">=1.4.0",
+    "ext-ctype": ">=7.0.0",
+    "ext-date": ">=7.0.0",
+    "ext-pcre": ">=7.0.0"
+  },
+  "suggest": {
+    "ext-redis": "For RCache and RedisCachedModel",
+    "ext-memcache": "For MCache",
+    "ext-pdo_mysql": "For orm Model",
+    "ext-pdo_sqlite": "For SQLite db component"
+  },
+  "autoload": {
+    "psr-4": {
+      "x2ts\\": "src"
+    }
+  }
+}
