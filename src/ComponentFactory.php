@@ -3,12 +3,22 @@
 namespace x2ts;
 
 use InvalidArgumentException;
+use Monolog\Logger as MonoLogger;
 use ReflectionClass;
 use stdClass;
 
-defined(X_DEBUG) or define('X_DEBUG', true);
-defined(X_LOG_LEVEL) or define('X_LOG_LEVEL', X_DEBUG ? X_LOG_DEBUG : X_LOG_NOTICE);
-defined(X_RUNTIME_ROOT) or define('X_RUNTIME_ROOT', sys_get_temp_dir());
+define('X_LOG_DEBUG', MonoLogger::DEBUG);
+define('X_LOG_INFO', MonoLogger::INFO);
+define('X_LOG_NOTICE', MonoLogger::NOTICE);
+define('X_LOG_WARNING', MonoLogger::WARNING);
+define('X_LOG_ERROR', MonoLogger::ERROR);
+define('X_LOG_CRITICAL', MonoLogger::CRITICAL);
+define('X_LOG_ALERT', MonoLogger::ALERT);
+define('X_LOG_EMERGENCY', MonoLogger::EMERGENCY);
+
+defined('X_DEBUG') or define('X_DEBUG', true);
+defined('X_LOG_LEVEL') or define('X_LOG_LEVEL', X_DEBUG ? X_LOG_DEBUG : X_LOG_NOTICE);
+defined('X_RUNTIME_ROOT') or define('X_RUNTIME_ROOT', sys_get_temp_dir());
 
 /**
  * Class ComponentFactory

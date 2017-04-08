@@ -28,6 +28,22 @@ class Validator extends Component {
         'autoTrim' => true,
     );
 
+    public function getConfHash() {
+        $hash = parent::getConfHash();
+        if ($hash) {
+            return $hash;
+        }
+        if ($this === $this->shell || null === $this->shell) {
+            return 'validator';
+        }
+        return $this->shell->getConfHash();
+    }
+
+    public function getConf() {
+        $conf = parent::getConf();
+        return empty($conf) ? static::$_conf : $conf;
+    }
+
     protected $validated = false;
 
     /**
@@ -355,7 +371,7 @@ class Validator extends Component {
 
     private function isEmpty($var) {
         return null === $var || '' === $var ||
-        (is_array($var) && 0 === count($var));
+            (is_array($var) && 0 === count($var));
     }
 
     /**
@@ -412,7 +428,7 @@ class Validator extends Component {
      * @return Validator
      * @throws \x2ts\validator\ValidatorException
      */
-    final public function validate(callable $onDataInvalid = null):Validator {
+    final public function validate(callable $onDataInvalid = null): Validator {
         $shell = $this->shell;
         if (count($shell->subValidators)) {
             $shell->_safeVar = [];
@@ -465,7 +481,7 @@ class Validator extends Component {
     final public function assignTo(
         IAssignable $target,
         callable $onDataInvalid = null
-    ):IAssignable {
+    ): IAssignable {
         $shell = $this->validated ? $this->shell : $this->validate($onDataInvalid);
 
         if ($shell->_isValid && is_array($shell->_safeVar)) {

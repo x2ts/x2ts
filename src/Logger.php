@@ -9,17 +9,9 @@
 namespace x2ts;
 
 
+use Monolog\Handler\AbstractHandler;
 use Monolog\Logger as MonoLogger;
 use Throwable;
-
-define('X_LOG_DEBUG', MonoLogger::DEBUG);
-define('X_LOG_INFO', MonoLogger::INFO);
-define('X_LOG_NOTICE', MonoLogger::NOTICE);
-define('X_LOG_WARNING', MonoLogger::WARNING);
-define('X_LOG_ERROR', MonoLogger::ERROR);
-define('X_LOG_CRITICAL', MonoLogger::CRITICAL);
-define('X_LOG_ALERT', MonoLogger::ALERT);
-define('X_LOG_EMERGENCY', MonoLogger::EMERGENCY);
 
 /**
  * Class Logger
@@ -36,11 +28,6 @@ class Logger extends Component {
     ];
 
     /**
-     * @var int
-     */
-    private $pid;
-
-    /**
      * @var MonoLogger
      */
     private $_logger;
@@ -51,7 +38,10 @@ class Logger extends Component {
             /** @var array $handlerConfigs */
             $handlerConfigs = $this->conf['handlers'];
             foreach ($handlerConfigs as $class => $args) {
-                $this->_logger->pushHandler(new $class(...$args));
+                /** @var AbstractHandler $handler */
+                $handler = new $class(...$args);
+                $handler->setFormatter(new LoggerFormatter());
+                $this->_logger->pushHandler($handler);
             }
         }
         return $this->_logger;
@@ -120,21 +110,18 @@ class Logger extends Component {
             $logMessage = (string) $msg;
         }
         $trace = debug_backtrace();
-        if ($traceIndex < count($trace)) {
-            $class = $trace[$traceIndex]['class'] ?? 'FUNC';
-            $func = $trace[$traceIndex]['function'];
-            $category = "$class::$func";
-        } else {
-            $category = 'GLOBAL';
+        while ($traceIndex-- > 0) {
+            array_shift($trace);
         }
+//        if ($traceIndex < count($trace)) {
+//            $class = $trace[$traceIndex]['class'] ?? 'FUNC';
+//            $func = $trace[$traceIndex]['function'];
+//            $source = "$class::$func";
+//        } else {
+//            $source = 'GLOBAL';
+//        }
 
         /** @noinspection ReturnFalseInspection */
-        $this->logger->addRecord($level, sprintf(
-            '[%s][%d][%s]%s',
-            date('c'),
-            $this->pid ?? ($this->pid = posix_getpid()),
-            $category,
-            $logMessage
-        ));
+        $this->logger->addRecord($level, $logMessage, $trace);
     }
 }

@@ -15,7 +15,7 @@ trait TConfig {
      * @return array
      */
     public function getConf() {
-        return Configuration::$configuration[$this->_confHash] ?? [];
+        return Configuration::$configuration[$this->getConfHash()] ?? [];
     }
 
     public function getConfHash() {
