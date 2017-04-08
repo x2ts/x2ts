@@ -4,6 +4,7 @@
         <testsuite name="x2ts tests">
             <file>test/ToolkitTest.php</file>
             <file>test/ValidatorTest.php</file>
+            <file>test/ComponentFactoryTest.php</file>
         </testsuite>
     </testsuites>
     <filter>

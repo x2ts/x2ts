@@ -23,7 +23,7 @@ class T extends ComponentFactory {
 }
 
 T::conf([
-    'component' => [
+    'component'     => [
         'bus'       => [
             'class'     => event\Bus::class,
             'singleton' => true,
@@ -96,5 +96,9 @@ T::conf([
                 'autoTrim' => true,
             ],
         ],
+    ],
+    'someOtherConf' => [
+        'sth' => 'abc',
+        'foo' => 'bar',
     ],
 ]);
