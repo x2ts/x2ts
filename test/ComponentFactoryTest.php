@@ -27,10 +27,50 @@ class ComponentFactoryTest extends TestCase {
         static::assertEquals('abc', $someOtherConf->sth);
     }
 
-    public function testConfOveride() {
+    public function testConfOverride() {
         static::assertEquals('bar', T::conf('someOtherConf')['foo']);
         T::conf(['someOtherConf' => ['foo' => 'def']]);
         static::assertEquals('def', T::conf('someOtherConf')['foo']);
         static::assertEquals('abc', T::conf('someOtherConf')['sth']);
+    }
+
+    private function logFile() {
+        return X_RUNTIME_ROOT . '/app.log';
+    }
+
+    public function testLog() {
+        T::log('cft', X_LOG_CRITICAL);
+        system('tail -n 1 ' . $this->logFile());
+        $this->getActualOutput();
+        $this->expectOutputRegex("/\[critical\]\[\d+\]\[x2ts\\\\ComponentFactoryTest::testLog\]cft/");
+    }
+
+    public function testTrace() {
+        T::trace('cft');
+        system('tail -n 1 ' . $this->logFile());
+        $this->getActualOutput();
+        $this->expectOutputRegex("/\[debug\]\[\d+\]\[x2ts\\\\ComponentFactoryTest::testTrace\]cft/");
+    }
+
+    public function testGetSingleton() {
+        self::assertInstanceOf(event\Bus::class, T::bus());
+    }
+
+    public function testGetInstance() {
+        self::assertInstanceOf(validator\Validator::class, T::validator([]));
+    }
+
+    /**
+     * @expectedException \x2ts\ComponentNotFoundException
+     */
+    public function testNotExistsComponent() {
+        T::getComponent('notExists');
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testNotIComponent() {
+        T::getInstance('stdClass', [], [], '');
     }
 }
