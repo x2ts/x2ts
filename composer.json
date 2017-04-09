@@ -10,7 +10,6 @@
     }
   ],
   "require": {
-    "roave/security-advisories": "dev-master",
     "php": ">=7.0.0",
     "ext-Reflection": ">=7.0.0",
     "ext-PDO": ">=7.0.0",
