@@ -517,7 +517,7 @@ abstract class Action {
         if (isset($args[0]) && is_string($args[0])) {
             $cacheId = array_shift($args);
         } else {
-            $cacheId = null;
+            $cacheId = '';
         }
 
         return $this->view->render($tpl, $params, $cacheId);
