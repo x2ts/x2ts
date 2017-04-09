@@ -17,7 +17,7 @@ abstract class Component implements IComponent {
      * @static
      * @var array
      */
-    protected static $_conf;
+    protected static $_conf = [];
 
     public function init() { }
 }
