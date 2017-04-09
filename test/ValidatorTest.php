@@ -9,10 +9,13 @@
 namespace x2ts;
 
 use PHPUnit\Framework\TestCase;
+use x2ts\validator\DateValidator;
 use x2ts\validator\DecimalValidator;
+use x2ts\validator\FloatValidator;
 use x2ts\validator\HexadecimalValidator;
 use x2ts\validator\IntegerValidator;
 use x2ts\validator\StringValidator;
+use x2ts\validator\Validator;
 use x2ts\validator\ValidatorException;
 
 require_once __DIR__ . '/xts.php';
@@ -31,6 +34,9 @@ class ValidatorTest extends TestCase {
             'zeroIntStr'     => '0',
             'positiveIntStr' => '8',
             'negativeIntStr' => '-6',
+            'hexStr'         => 'ffc0',
+            'floatStr'       => '3.14',
+            'float'          => 6.22,
             'on'             => 'on',
             'off'            => 'off',
             'indexedArr'     => [
@@ -40,6 +46,7 @@ class ValidatorTest extends TestCase {
             'telNumber'      => '+86-010-67798810-3752',
             'mobile'         => '13800138000',
             'email'          => 'superman@example.com',
+            'url'            => 'http://www.google.com/',
             'string'         => 'Hello, world!',
         ];
     }
@@ -72,6 +79,11 @@ class ValidatorTest extends TestCase {
             ->str('null')
             ->onEmptyReport('report')
             ->validate();
+    }
+
+    public function testEmptyStringDoNothing() {
+        $v = (new StringValidator(''))->validate();
+        self::assertTrue($v->isEmpty);
     }
 
     public function testEmptyArraySet() {
@@ -172,6 +184,25 @@ class ValidatorTest extends TestCase {
             ->validate()
             ->safeVar;
         static::assertEquals('superman@example.com', $r['email']);
+    }
+
+    public function testUrl() {
+        $r = T::validator($this->testData)
+            ->url('url')
+            ->onErrorReport('error')
+            ->validate()
+            ->safeVar;
+        static::assertEquals('http://www.google.com/', $r['url']);
+    }
+
+    /**
+     * @expectedException \x2ts\validator\ValidatorException
+     */
+    public function testInvalidUrl() {
+        T::validator($this->testData)
+            ->url('string')
+            ->onErrorReport('error')
+            ->validate();
     }
 
     /**
@@ -338,6 +369,7 @@ class ValidatorTest extends TestCase {
         return [
             [true, 'hello, world!', 'rld!'],
             [false, 'hello, world!', 'Rld!'],
+            [false, 'hello, world!', 'llo'],
         ];
     }
 
@@ -363,6 +395,7 @@ class ValidatorTest extends TestCase {
         return [
             [true, 'Good morning', 'MorNing'],
             [false, 'Good morning', 'good'],
+            [false, 'Good morning', 'abc'],
         ];
     }
 
@@ -491,6 +524,14 @@ class ValidatorTest extends TestCase {
         ];
     }
 
+    public function testValidatorInt() {
+        $v = T::validator($this->testData)
+            ->int('positiveIntStr')
+            ->validate()
+            ->safeVar;
+        self::assertSame(8, $v['positiveIntStr']);
+    }
+
     /**
      * @param      $report
      * @param      $input
@@ -530,6 +571,23 @@ class ValidatorTest extends TestCase {
             ['error', '123great'],
             ['error', '0xhh'],
         ];
+    }
+
+    public function testValidatorDec() {
+        self::assertSame(
+            8, T::validator($this->testData)
+            ->dec('positiveIntStr')
+            ->validate()
+            ->safeVar['positiveIntStr']);
+    }
+
+    public function testValidatorHex() {
+        self::assertSame(
+            0xffc0, T::validator($this->testData)
+            ->hex('hexStr')
+            ->validate()
+            ->safeVar['hexStr']
+        );
     }
 
     /**
@@ -573,6 +631,62 @@ class ValidatorTest extends TestCase {
         ];
     }
 
+    /**
+     * @param      $report
+     * @param      $input
+     * @param null $expect
+     *
+     * @dataProvider dataForFloat
+     */
+    public function testFloat($report, $input, $expect = null) {
+        try {
+            $var = (new FloatValidator($input))
+                ->onEmptyReport('empty')
+                ->onErrorReport('error')
+                ->validate()
+                ->safeVar;
+            self::assertFalse($report, "The input: $input");
+            self::assertSame($expect, $var, "The input: $input");
+        } catch (ValidatorException $e) {
+            self::assertEquals($report, $e->getMessage());
+        }
+    }
+
+    public function dataForFloat() {
+        return [
+            [false, 0.1, 0.1],
+            [false, '0.1', 0.1],
+            [false, '3.14', 3.14],
+            [false, '-2.7', -2.7],
+            [false, '0.0', 0.0],
+            [false, '13', 13.0],
+            ['empty', ''],
+            ['empty', null],
+            ['error', 'abc'],
+            ['error', '2.7abc'],
+        ];
+    }
+
+    public function testValidatorFloat() {
+        $vars = T::validator($this->testData)
+            ->float('floatStr')
+            ->float('float')
+            ->validate()
+            ->safeVar;
+        self::assertSame(3.14, $vars['floatStr']);
+        self::assertSame(6.22, $vars['float']);
+    }
+
+    public function testBool() {
+        $vars = T::validator($this->testData)
+            ->bool('on')
+            ->bool('off')
+            ->validate()
+            ->safeVar;
+        self::assertSame(1, $vars['on']);
+        self::assertSame(0, $vars['off']);
+    }
+
     public function testOnUndefinedIgnore() {
         $var = T::validator($this->testData)
             ->str('notExistStr')
@@ -600,5 +714,64 @@ class ValidatorTest extends TestCase {
         static::assertArrayNotHasKey('null', $var);
         static::assertArrayNotHasKey('emptyStr', $var);
         static::assertArrayNotHasKey('emptyArr', $var);
+    }
+
+    public function testOnErrorSet() {
+        $var = T::validator($this->testData)
+            ->date('telNumber')
+            ->onErrorSet('1999-12-20')
+            ->validate()
+            ->safeVar;
+        self::assertSame('1999-12-20', $var['telNumber']);
+    }
+
+    public function testDate() {
+        self::assertSame(
+            '2017-03-21',
+            (new DateValidator('2017-03-21'))
+                ->onErrorReport('error')
+                ->validate()
+                ->safeVar
+        );
+    }
+
+    /**
+     * @expectedException \x2ts\validator\ValidatorException
+     */
+    public function testInvalidDate() {
+        (new DateValidator('sadloeokskd'))
+            ->validate();
+    }
+
+    public function testDataInvalidCallback() {
+        T::validator($this->testData)
+            ->email('mobile')
+            ->validate(function (array $messages, Validator $validator) {
+                self::assertArrayHasKey('mobile', $messages);
+                self::assertFalse($validator->isValid);
+                self::assertFalse($validator->isEmpty);
+            });
+    }
+
+    public function testAssignTo() {
+        $o = T::validator($this->testData)
+            ->str('emptyStr')
+            ->onEmptySet('abc')
+            ->email('email')
+            ->url('url')
+            ->int('negativeIntStr')
+            ->assignTo(new class implements IAssignable {
+                public $data = [];
+
+                public function assign(array $array) {
+                    foreach ($array as $key => $value) {
+                        $this->data[$key] = $value;
+                    }
+                }
+            });
+        self::assertSame('abc', $o->data['emptyStr']);
+        self::assertSame($this->testData['email'], $o->data['email']);
+        self::assertSame($this->testData['url'], $o->data['url']);
+        self::assertSame(-6, $o->data['negativeIntStr']);
     }
 }
