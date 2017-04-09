@@ -88,6 +88,10 @@ class Logger extends Component {
         $this->log($msg, X_LOG_NOTICE, 2);
     }
 
+    public function warn($msg) {
+        $this->log($msg, X_LOG_WARNING, 2);
+    }
+
     public function warning($msg) {
         $this->log($msg, X_LOG_WARNING, 2);
     }
@@ -96,12 +100,20 @@ class Logger extends Component {
         $this->log($msg, X_LOG_ERROR, 2);
     }
 
+    public function crit($msg) {
+        $this->log($msg, X_LOG_CRITICAL, 2);
+    }
+
     public function critical($msg) {
         $this->log($msg, X_LOG_CRITICAL, 2);
     }
 
     public function alert($msg) {
         $this->log($msg, X_LOG_ALERT, 2);
+    }
+
+    public function emerg($msg) {
+        $this->log($msg, X_LOG_EMERGENCY, 2);
     }
 
     public function emergency($msg) {

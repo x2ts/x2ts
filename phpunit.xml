@@ -5,6 +5,7 @@
             <file>test/ToolkitTest.php</file>
             <file>test/ValidatorTest.php</file>
             <file>test/ComponentFactoryTest.php</file>
+            <file>test/LoggerTest.php</file>
         </testsuite>
     </testsuites>
     <filter>
