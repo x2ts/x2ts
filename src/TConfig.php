@@ -30,7 +30,7 @@ trait TConfig {
             Toolkit::override($settings, static::$_conf);
             Toolkit::override($settings, $conf);
             Configuration::$configuration[$hash] = $settings;
-            $this->_confHash = $hash;
         }
+        $this->_confHash = $hash;
     }
 }
