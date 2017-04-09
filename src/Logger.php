@@ -9,6 +9,7 @@
 namespace x2ts;
 
 
+use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Logger as MonoLogger;
 use Throwable;
@@ -40,7 +41,31 @@ class Logger extends Component {
             foreach ($handlerConfigs as $class => $args) {
                 /** @var AbstractHandler $handler */
                 $handler = new $class(...$args);
-                $handler->setFormatter(new LoggerFormatter());
+                /** @noinspection PhpParamsInspection */
+                $handler->setFormatter(new class implements FormatterInterface {
+                    private $pid;
+
+                    public function format(array $record) {
+                        $source = count($record['context']) ?
+                            (($record['context'][0]['class'] ?? 'FUNC') . '::' .
+                                $record['context'][0]['function']) :
+                            'GLOBAL';
+                        $pid = $this->pid ?? ($this->pid = posix_getpid());
+                        /** @var \DateTime $datetime */
+                        $datetime = $record['datetime'];
+                        return sprintf('[%s][%s][%d][%s]%s',
+                                $datetime->format('c'),
+                                strtolower($record['level_name']),
+                                $pid,
+                                $source,
+                                $record['message']
+                            ) . "\n";
+                    }
+
+                    public function formatBatch(array $records) {
+                        return implode('', array_map([$this, 'format'], $records));
+                    }
+                });
                 $this->_logger->pushHandler($handler);
             }
         }
@@ -113,14 +138,6 @@ class Logger extends Component {
         while ($traceIndex-- > 0) {
             array_shift($trace);
         }
-//        if ($traceIndex < count($trace)) {
-//            $class = $trace[$traceIndex]['class'] ?? 'FUNC';
-//            $func = $trace[$traceIndex]['function'];
-//            $source = "$class::$func";
-//        } else {
-//            $source = 'GLOBAL';
-//        }
-
         /** @noinspection ReturnFalseInspection */
         $this->logger->addRecord($level, $logMessage, $trace);
     }
