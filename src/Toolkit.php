@@ -194,7 +194,7 @@ abstract class Toolkit {
         $logger->log($msg, $logLevel, 2);
     }
 
-    public static function random_chars(int $length): string {
+    public static function randomChars(int $length): string {
         return substr(
             str_replace(['+', '/', '='], '', base64_encode(
                 random_bytes($length << 1)

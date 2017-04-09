@@ -285,4 +285,9 @@ class ToolkitTest extends TestCase {
             $this->expectOutputRegex('/\[error\]\[\d+\]\[x2ts\\\\ToolkitTest::testThrowableLog\].*Some say good while some say bad/');
         }
     }
+
+    public function testRandomChars() {
+        $chars = Toolkit::randomChars(16);
+        static::assertEquals(16, strlen($chars));
+    }
 }
