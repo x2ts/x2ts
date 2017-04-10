@@ -29,6 +29,7 @@ defined('X_RUNTIME_ROOT') or define('X_RUNTIME_ROOT', sys_get_temp_dir());
  * @method static cache\ICache cache()
  * @method static db\IDataBase db()
  * @method static view\IView view()
+ * @method static route\Router router()
  * @package x2ts
  */
 abstract class ComponentFactory extends Component {
