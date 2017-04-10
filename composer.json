@@ -34,7 +34,7 @@
     "psr-4": {
       "x2ts\\": [
         "src",
-        "test"
+        "tests"
       ]
     }
   }

@@ -2,10 +2,10 @@
 <phpunit bootstrap="vendor/autoload.php" colors="true">
     <testsuites>
         <testsuite name="x2ts tests">
-            <file>test/ToolkitTest.php</file>
-            <file>test/ValidatorTest.php</file>
-            <file>test/ComponentFactoryTest.php</file>
-            <file>test/LoggerTest.php</file>
+            <file>tests/ToolkitTest.php</file>
+            <file>tests/ValidatorTest.php</file>
+            <file>tests/ComponentFactoryTest.php</file>
+            <file>tests/LoggerTest.php</file>
         </testsuite>
     </testsuites>
     <filter>
