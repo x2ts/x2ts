@@ -23,6 +23,10 @@ abstract class Toolkit {
         return var_export($var, true);
     }
 
+    public static function isIndexedArray(array $arr): bool {
+        return array_keys($arr) === range(0, count($arr) - 1);
+    }
+
     /**
      * @param array $dst
      * @param array $src
@@ -31,12 +35,16 @@ abstract class Toolkit {
      */
     public static function &override(&$dst, $src) {
         foreach ($src as $key => $value) {
-            if (is_int($key)) {
-                $dst[] = $value;
-            } else if (!array_key_exists($key, $dst)) {
+            if (!array_key_exists($key, $dst)) {
                 $dst[$key] = $value;
             } else if (is_array($value) && is_array($dst[$key])) {
-                self::override($dst[$key], $value);
+                if (self::isIndexedArray($dst[$key])) {
+                    $dst[$key] = $value;
+                } else {
+                    self::override($dst[$key], $value);
+                }
+            } else if (is_int($key)) {
+                $dst[] = $value;
             } else {
                 $dst[$key] = $value;
             }
