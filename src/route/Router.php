@@ -14,14 +14,17 @@ use x2ts\Toolkit;
 /**
  * Class Router
  *
- * @property IRule[] $rules
+ * @property IRule[]     $rules
+ * @property-read Action $action
  * @package x2ts\route
  */
 class Router extends Component {
-    protected static $_conf = array(
+    protected static $_conf = [
         'baseUri' => '',
         'rules'   => [],
-    );
+    ];
+
+    protected $action;
 
     public function init() {
         /** @var array $rules */
@@ -65,6 +68,7 @@ class Router extends Component {
                 $args = $rule->fetchArguments();
                 $action->request = $req;
                 $action->response = $res;
+                $this->action = $action;
                 $postRoute = new PostRouteEvent([
                     'dispatcher' => $this,
                     'uri'        => $uri,
@@ -106,5 +110,12 @@ class Router extends Component {
      */
     public function setRules(array $rules) {
         $this->rules = $rules;
+    }
+
+    /**
+     * @return Action
+     */
+    public function getAction() {
+        return $this->action;
     }
 }
