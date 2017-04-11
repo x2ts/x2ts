@@ -106,7 +106,7 @@ class Model extends Component implements
     }
 
     public function __sleep() {
-        return ['_modelName', '_properties', '_modified', '_oldPK'];
+        return ['_modelName', '_properties', '_modified', '_oldPK', '_confHash'];
     }
 
     public function __wakeup() {

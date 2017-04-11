@@ -9,7 +9,10 @@
 namespace x2ts;
 
 trait TConfig {
-    private $_confHash;
+    /**
+     * @var string
+     */
+    protected $_confHash = '';
 
     /**
      * @return array
