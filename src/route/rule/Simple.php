@@ -66,7 +66,7 @@ class Simple implements IRule {
             if (class_exists($classNameAction)) {
                 $this->action = new $classNameAction();
             } else if (class_exists($className)) {
-                $this->action = new $classNameAction();
+                $this->action = new $className();
             }
 
             if ($this->action instanceof Action) {
