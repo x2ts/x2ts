@@ -463,7 +463,7 @@ class Model extends Component implements
      */
     protected function loadRelationObj(
         string $name,
-        string $condition = null,
+        string $condition = '',
         array $params = [],
         int $offset = 0,
         int $limit = 200
