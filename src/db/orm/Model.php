@@ -124,14 +124,12 @@ class Model extends Component implements
         @list($modelName) = $args;
         $namespace = $conf['namespace'] ?? static::$_conf['namespace'];
         $className = "\\{$namespace}\\" . Toolkit::toCamelCase($modelName, true);
-        if (class_exists($className)) {
-            /** @var Model $model */
-            $model = new $className($modelName);
-            $model->saveConf($conf, $confHash);
-            $model->init();
-        }
+        /** @var Model $model */
+        $model = class_exists($className) ? new $className($modelName) : new Model($modelName);
+        $model->saveConf($conf, $confHash);
+        $model->init();
 
-        return new Model($modelName);
+        return $model;
     }
 
     /**
