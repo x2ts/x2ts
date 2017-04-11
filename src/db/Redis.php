@@ -28,7 +28,7 @@ class Redis extends PhpRedis implements IComponent {
     use TGetterSetter;
     use TConfig;
 
-    protected static $_conf = array(
+    protected static $_conf = [
         'host'           => 'localhost',
         'port'           => 6379,
         'timeout'        => 0,
@@ -37,7 +37,7 @@ class Redis extends PhpRedis implements IComponent {
         'database'       => 0,
         'auth'           => null,
         'keyPrefix'      => '',
-    );
+    ];
 
     public function init() {
         if (!extension_loaded('redis')) {
@@ -71,13 +71,6 @@ class Redis extends PhpRedis implements IComponent {
         if ($conf['keyPrefix']) {
             $this->setOption(PhpRedis::OPT_PREFIX, $conf['keyPrefix']);
         }
-    }
-
-    /**
-     * @return array
-     */
-    public function getConf() {
-        return static::$_conf;
     }
 
     /**
