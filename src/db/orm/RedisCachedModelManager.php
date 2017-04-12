@@ -236,7 +236,7 @@ final class RedisCachedModelManager implements IModelManager {
         if (null === $pk) {
             $pk = $this->model->pk;
         }
-        return "rmc:p:{$this->model->db->dbName}:{$this->model->tableName}:{$pk}";
+        return "rmc2:p:{$this->model->db->dbName}:{$this->model->tableName}:{$pk}";
     }
 
     /** @noinspection MoreThanThreeArgumentsInspection
@@ -250,25 +250,25 @@ final class RedisCachedModelManager implements IModelManager {
     protected function getManyKey(string $condition, array $params, $offset, $limit) {
         $p = serialize($params);
         $md5 = md5("$condition:$p:$offset:$limit");
-        return "rmc:m:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
+        return "rmc2:m:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
     }
 
     protected function getOneKey($condition, $params) {
         $p = serialize($params);
         $md5 = md5("$condition:$p");
-        return "rmc:o:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
+        return "rmc2:o:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
     }
 
     protected function getSqlKey($sql, $params) {
         $p = serialize($params);
         $md5 = md5("$sql:$p");
-        return "rmc:m:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
+        return "rmc2:m:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
     }
 
     protected function getCountKey($condition, $params) {
         $p = serialize($params);
         $md5 = md5("$condition:$p");
-        return "rmc:c:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
+        return "rmc2:c:{$this->model->db->dbName}:{$this->model->tableName}:{$md5}";
     }
 
     /**
