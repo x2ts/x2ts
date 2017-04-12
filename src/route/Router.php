@@ -76,6 +76,7 @@ class Router extends Component {
                     'args'       => $args,
                 ]);
                 X::bus()->dispatch($postRoute);
+                $action->init();
                 $action->run($args);
                 return true;
             }
