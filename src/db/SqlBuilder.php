@@ -172,10 +172,10 @@ class SqlBuilder {
      * @return SqlBuilder
      */
     public function limit(int $offset, int $length = 0) {
-        if (0 === $offset) {
-            return $this;
-        }
         if (0 === $length) {
+            if (0 === $offset) {
+                return $this;
+            }
             $length = $offset;
             $offset = 0;
         }
