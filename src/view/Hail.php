@@ -932,7 +932,6 @@ namespace x2ts\view {
     use x2ts\cache\ICache;
     use x2ts\Component;
     use x2ts\ComponentFactory as X;
-    use x2ts\Toolkit;
 
     class Hail extends Component implements IView {
         /**
@@ -987,7 +986,7 @@ namespace x2ts\view {
          * @return string
          */
         public function render(string $tpl, array $params = array(), string $cacheId = ''): string {
-            $useCache = null !== $cacheId && $this->conf['cacheId'];
+            $useCache = '' !== $cacheId && $this->conf['cacheId'];
             if ($useCache) {
                 /**
                  * @var ICache $cache

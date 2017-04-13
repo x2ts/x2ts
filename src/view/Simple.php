@@ -709,7 +709,7 @@ namespace x2ts\view {
          * @return string
          */
         public function render(string $tpl, array $params = [], string $cacheId = '') {
-            $useCache = null !== $cacheId && $this->conf['cacheId'];
+            $useCache = '' !== $cacheId && $this->conf['cacheId'];
             if ($useCache) {
                 /**
                  * @var \x2ts\cache\ICache $cache
