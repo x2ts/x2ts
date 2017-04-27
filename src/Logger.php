@@ -39,6 +39,9 @@ class Logger extends Component {
             /** @var array $handlerConfigs */
             $handlerConfigs = $this->conf['handlers'];
             foreach ($handlerConfigs as $class => $args) {
+                if (!is_array($args)) {
+                    continue;
+                }
                 /** @var AbstractHandler $handler */
                 $handler = new $class(...$args);
                 /** @noinspection PhpParamsInspection */
@@ -46,9 +49,18 @@ class Logger extends Component {
                     private $pid;
 
                     public function format(array $record) {
-                        $source = count($record['context']) ?
-                            (($record['context'][0]['class'] ?? 'FUNC') . '::' .
-                                $record['context'][0]['function']) :
+                        $traceIndex = $record['context']['traceIndex'];
+                        $traces = debug_backtrace();
+                        foreach ($traces as $trace) {
+                            if ($trace['class'] === Logger::class && $trace['function'] === 'log') {
+                                break;
+                            }
+                            $traceIndex++;
+                        }
+
+                        $source = count($traces) ?
+                            (($traces[$traceIndex]['class'] ?? 'FUNC') . '::' .
+                                $traces[$traceIndex]['function']) :
                             'GLOBAL';
                         $pid = $this->pid ?? ($this->pid = posix_getpid());
                         /** @var \DateTime $datetime */
@@ -146,11 +158,7 @@ class Logger extends Component {
         } else {
             $logMessage = (string) $msg;
         }
-        $trace = debug_backtrace();
-        while ($traceIndex-- > 0) {
-            array_shift($trace);
-        }
         /** @noinspection ReturnFalseInspection */
-        $this->logger->addRecord($level, $logMessage, $trace);
+        $this->logger->addRecord($level, $logMessage, ['traceIndex' => $traceIndex]);
     }
 }
