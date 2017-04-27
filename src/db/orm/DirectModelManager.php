@@ -68,7 +68,7 @@ final class DirectModelManager implements IModelManager {
                         ->insertInto($this->model->tableName)
                         ->columns($this->model->tableSchema->columnNames)
                         ->values($this->model->properties)
-                        ->onDupKeyUpdate($this->model->properties)
+                        ->onDupKeyUpdate($this->model->modified)
                         ->query();
                     $pk = $this->model->db->getLastInsertId();
                     break;
