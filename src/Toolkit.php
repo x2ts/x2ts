@@ -2,9 +2,10 @@
 
 namespace x2ts;
 
-
 abstract class Toolkit {
-    private static $camelCase = [];
+    private static $camelCase = ['t' => [], 'f' => []];
+
+    private static $snake_case = ['t' => [], 'f' => []];
 
     /**
      * @param $var
@@ -61,7 +62,7 @@ abstract class Toolkit {
      * @return string
      */
     public static function toCamelCase($name, $Pascal = false) {
-        $p = $Pascal ? 'true' : 'false';
+        $p = $Pascal ? 't' : 'f';
         if (!isset(self::$camelCase[$p][$name])) {
             $r = self::extractWords($name);
             $r = ucwords($r);
@@ -99,12 +100,17 @@ abstract class Toolkit {
      * @return string
      */
     public static function to_snake_case($name, $Upper_First_Letter = false) {
-        $r = self::extractWords($name);
-        if ($Upper_First_Letter) {
-            $r = ucwords($r);
+        $u = $Upper_First_Letter ? 't' : 'f';
+        if (!isset(self::$snake_case[$u][$name])) {
+            $r = self::extractWords($name);
+            if ($Upper_First_Letter) {
+                $r = ucwords($r);
+            }
+            $r = strtr($r, array(' ' => '_'));
+            self::$snake_case[$u][$name] = $r;
         }
-        $r = strtr($r, array(' ' => '_'));
-        return $r;
+
+        return self::$snake_case[$u][$name];
     }
 
     /**
