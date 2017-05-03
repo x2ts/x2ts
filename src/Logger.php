@@ -11,6 +11,7 @@ namespace x2ts;
 
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\AbstractHandler;
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger as MonoLogger;
 use Throwable;
 
@@ -38,6 +39,11 @@ class Logger extends Component {
             $this->_logger = new MonoLogger($this->conf['name']);
             /** @var array $handlerConfigs */
             $handlerConfigs = $this->conf['handlers'];
+            if (empty($handlerConfigs)) {
+                $handlerConfigs = [
+                    StreamHandler::class => ['php://stderr', MonoLogger::DEBUG],
+                ];
+            }
             foreach ($handlerConfigs as $class => $args) {
                 if (!is_array($args)) {
                     continue;
