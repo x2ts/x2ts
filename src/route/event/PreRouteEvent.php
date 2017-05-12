@@ -12,6 +12,10 @@ namespace x2ts\route\event;
 use x2ts\event\Event;
 
 class PreRouteEvent extends Event {
+    public static function name(): string {
+        return 'x2ts.route.PreRoute';
+    }
+
     /**
      * @var string
      */
@@ -23,7 +27,6 @@ class PreRouteEvent extends Event {
             'uri'        => '',
         ]
     ) {
-        $name = 'x2ts.route.PreRoute';
-        parent::__construct($name, $props);
+        parent::__construct($props);
     }
 }

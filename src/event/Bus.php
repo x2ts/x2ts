@@ -35,7 +35,7 @@ class Bus extends Component {
      */
     public function dispatch(Event $event): int {
         /** @var array $listeners */
-        $listeners = $this->_events[$event->name] ?? [];
+        $listeners = $this->_events["$event"] ?? [];
         $i = 0;
         foreach ($listeners as $listener) {
             $callback = $listener['callback'];

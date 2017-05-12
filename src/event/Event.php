@@ -8,13 +8,10 @@
 
 namespace x2ts\event;
 
-use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
-class Event {
-    /**
-     * @var string
-     */
-    public $name = '';
+abstract class Event {
+    abstract public static function name(): string;
 
     /**
      * @var mixed
@@ -34,11 +31,9 @@ class Event {
     /**
      * Event constructor.
      *
-     * @param string $name
      * @param array  $props
      */
     public function __construct(
-        string $name,
         array $props = [
             'dispatcher' => null,
         ]
@@ -46,15 +41,14 @@ class Event {
         foreach ($props as $key => $value) {
             $this->$key = $value;
         }
-        $this->name = $name;
     }
 
     public function __toString() {
-        return $this->name;
+        return self::name();
     }
 
     public function stopAttaching($message) {
-        Toolkit::log("Event {$this->name} stopped attaching with message $message", X_LOG_INFO);
+        X::logger()->notice("Event $this stopped attaching with message $message");
         $this->stopped = true;
         return $this;
     }

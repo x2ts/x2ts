@@ -13,6 +13,10 @@ use x2ts\event\Event;
 use x2ts\route\Action;
 
 class PreRunEvent extends Event {
+    public static function name(): string {
+        return 'x2ts.route.PreRun';
+    }
+
     /**
      * @var Action
      */
@@ -24,6 +28,6 @@ class PreRunEvent extends Event {
             'action'     => null,
         ]
     ) {
-        parent::__construct('x2ts.route.PreRun', $props);
+        parent::__construct($props);
     }
 }

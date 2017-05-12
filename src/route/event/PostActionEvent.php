@@ -13,6 +13,10 @@ use x2ts\event\Event;
 use x2ts\route\Action;
 
 class PostActionEvent extends Event {
+    public static function name(): string {
+        return 'x2ts.route.PostAction';
+    }
+
     /**
      * @var  Action
      */
@@ -24,6 +28,6 @@ class PostActionEvent extends Event {
             'action'     => null,
         ]
     ) {
-        parent::__construct('x2ts.route.PostAction', $props);
+        parent::__construct($props);
     }
 }
