@@ -44,7 +44,7 @@ abstract class Event {
     }
 
     public function __toString() {
-        return self::name();
+        return static::name();
     }
 
     public function stopAttaching($message) {
