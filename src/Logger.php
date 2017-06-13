@@ -68,7 +68,7 @@ class Logger extends Component {
                             (($traces[$traceIndex]['class'] ?? 'FUNC') . '::' .
                                 $traces[$traceIndex]['function']) :
                             'GLOBAL';
-                        $pid = $this->pid ?? ($this->pid = posix_getpid());
+                        $pid = $this->pid ?? ($this->pid = getmypid());
                         /** @var \DateTime $datetime */
                         $datetime = $record['datetime'];
                         return sprintf('[%s][%s][%d][%s]%s',
