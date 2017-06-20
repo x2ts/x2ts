@@ -52,8 +52,6 @@ class Logger extends Component {
                 $handler = new $class(...$args);
                 /** @noinspection PhpParamsInspection */
                 $handler->setFormatter(new class implements FormatterInterface {
-                    private $pid;
-
                     public function format(array $record) {
                         $traceIndex = $record['context']['traceIndex'];
                         $traces = debug_backtrace();
@@ -68,13 +66,12 @@ class Logger extends Component {
                             (($traces[$traceIndex]['class'] ?? 'FUNC') . '::' .
                                 $traces[$traceIndex]['function']) :
                             'GLOBAL';
-                        $pid = $this->pid ?? ($this->pid = getmypid());
                         /** @var \DateTime $datetime */
                         $datetime = $record['datetime'];
                         return sprintf('[%s][%s][%d][%s]%s',
                                 $datetime->format('c'),
                                 strtolower($record['level_name']),
-                                $pid,
+                                getmypid(),
                                 $source,
                                 $record['message']
                             ) . "\n";
