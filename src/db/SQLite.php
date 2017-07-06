@@ -65,7 +65,7 @@ class SQLite extends Component implements IDataBase {
             $st = $this->pdo->prepare($sql);
             if ($st === false) {
                 $e = $this->pdo->errorInfo();
-                throw new DataBaseException($e[2], $e[1]);
+                throw new DataBaseException($e[2], $e[1], null, $this);
             }
             if ($st->execute($params)) {
                 $this->_affectedRows = $st->rowCount();
@@ -74,10 +74,10 @@ class SQLite extends Component implements IDataBase {
             }
 
             $e = $st->errorInfo();
-            throw new DataBaseException($e[2], $e[1]);
+            throw new DataBaseException($e[2], $e[1], null, $this);
         } catch (PDOException $ex) {
             Toolkit::trace($ex);
-            throw new DataBaseException($ex->getMessage(), $ex->getCode());
+            throw new DataBaseException($ex->getMessage(), $ex->getCode(), $ex, $this);
         }
     }
 
