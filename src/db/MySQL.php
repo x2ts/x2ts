@@ -59,7 +59,7 @@ class MySQL extends Component implements IDataBase {
             $this->initPdo();
             return $this->_pdo;
         }
-        if (!$this->pdo->inTransaction() && $this->mysqlLiveCheckTime <= time()) {
+        if (!$this->_pdo->inTransaction() && $this->mysqlLiveCheckTime <= time()) {
             $st = $this->_pdo->query('SELECT 1;');
             $r = [[false]];
             if ($st instanceof PDOStatement) {
