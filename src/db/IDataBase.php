@@ -2,8 +2,6 @@
 
 namespace x2ts\db;
 
-use PDO;
-
 interface IDataBase {
     /**
      * Query an SQL statement with parameters and returns the result set
@@ -60,9 +58,4 @@ interface IDataBase {
      * @return bool
      */
     public function rollback();
-
-    /**
-     * @return PDO
-     */
-    public function getPdo(): PDO;
 }
