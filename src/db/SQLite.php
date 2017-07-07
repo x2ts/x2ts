@@ -28,7 +28,7 @@ class SQLite extends Component implements IDataBase {
     /**
      * @return PDO
      */
-    public function getPdo() {
+    public function getPdo(): PDO {
         if (!$this->_pdo instanceof PDO) {
             $conf = $this->conf;
             $this->_pdo = new PDO ("sqlite:{$conf['filename']}");
@@ -135,5 +135,12 @@ class SQLite extends Component implements IDataBase {
      */
     public function rollback() {
         return $this->pdo->rollBack();
+    }
+
+    /**
+     * @return bool
+     */
+    public function inTransaction(): bool {
+        return (bool) $this->_pdo instanceof PDO && $this->_pdo->inTransaction();
     }
 }

@@ -54,12 +54,12 @@ class MySQL extends Component implements IDataBase {
     /**
      * @return PDO
      */
-    public function getPdo() {
+    public function getPdo(): PDO {
         if (!$this->_pdo instanceof PDO) {
             $this->initPdo();
             return $this->_pdo;
         }
-        if (!$this->inTransaction && $this->mysqlLiveCheckTime <= time()) {
+        if (!$this->_pdo->inTransaction() && $this->mysqlLiveCheckTime <= time()) {
             $st = $this->_pdo->query('SELECT 1;');
             $r = [[false]];
             if ($st instanceof PDOStatement) {
@@ -167,7 +167,6 @@ class MySQL extends Component implements IDataBase {
      * @return boolean
      */
     public function startTransaction() {
-        $this->inTransaction = true;
         return $this->pdo->beginTransaction();
     }
 
@@ -175,7 +174,6 @@ class MySQL extends Component implements IDataBase {
      * @return boolean
      */
     public function commit() {
-        $this->inTransaction = false;
         return $this->pdo->commit();
     }
 
@@ -183,7 +181,6 @@ class MySQL extends Component implements IDataBase {
      * @return boolean
      */
     public function rollback() {
-        $this->inTransaction = false;
         return $this->pdo->rollBack();
     }
 
@@ -198,7 +195,13 @@ class MySQL extends Component implements IDataBase {
                 PDO::ATTR_PERSISTENT         => $conf['persistent'],
             )
         );
-        $this->inTransaction = false;
         $this->mysqlLiveCheckTime = time() + $conf['mysqlCheckDuration'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function inTransaction(): bool {
+        return (bool) $this->_pdo instanceof PDO && $this->_pdo->inTransaction();
     }
 }
