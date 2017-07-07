@@ -62,7 +62,7 @@ class Logger extends Component {
                             $traceIndex++;
                         }
 
-                        $source = count($traces) ?
+                        $source = $traceIndex < count($traces) ?
                             (($traces[$traceIndex]['class'] ?? 'FUNC') . '::' .
                                 $traces[$traceIndex]['function']) :
                             'GLOBAL';
