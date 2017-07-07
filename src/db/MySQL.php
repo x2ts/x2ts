@@ -202,6 +202,6 @@ class MySQL extends Component implements IDataBase {
      * @return bool
      */
     public function inTransaction(): bool {
-        return (bool) $this->_pdo instanceof PDO && $this->_pdo->inTransaction();
+        return (bool) ($this->_pdo instanceof PDO && $this->_pdo->inTransaction());
     }
 }
