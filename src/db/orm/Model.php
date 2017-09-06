@@ -14,6 +14,7 @@ use x2ts\db\SqlBuilder;
 use x2ts\IAssignable;
 use x2ts\MethodNotImplementException;
 use x2ts\Toolkit;
+use Yaf\Exception\TypeError;
 
 
 /**
@@ -551,11 +552,17 @@ class Model extends Component implements
     }
 
     /**
-     * @param array $props
+     * @param array|\Traversable $props
      *
      * @return $this
+     * @throws TypeError
      */
-    public function assign(array $props) {
+    public function assign($props) {
+        if (!is_array($props) && !$props instanceof \Traversable) {
+            throw new TypeError('Argument 1 passed to ' .
+                __METHOD__
+                . ' must be an instance of iterable, ' . gettype($props) . ' given');
+        }
         if ($this->isNewRecord && !empty($props[$this->pkName])) {
             $this->load($props[$this->pkName]);
         }

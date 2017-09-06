@@ -10,5 +10,10 @@ namespace x2ts;
 
 
 interface IAssignable {
-    public function assign(array $array);
+    /**
+     * @param array|\Traversable $array
+     *
+     * @return $this
+     */
+    public function assign($array);
 }
