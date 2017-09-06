@@ -763,10 +763,11 @@ class ValidatorTest extends TestCase {
             ->assignTo(new class implements IAssignable {
                 public $data = [];
 
-                public function assign(array $array) {
+                public function assign($array) {
                     foreach ($array as $key => $value) {
                         $this->data[$key] = $value;
                     }
+                    return $this;
                 }
             });
         self::assertSame('abc', $o->data['emptyStr']);
