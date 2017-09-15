@@ -33,9 +33,15 @@ class Simple implements IRule {
         $this->_conf = $conf;
     }
 
-    private $action;
+    /**
+     * @var Action
+     */
+    public $action;
 
-    private $args;
+    /**
+     * @var array
+     */
+    public $args = [];
 
     /**
      * @param string $uri
@@ -80,7 +86,7 @@ class Simple implements IRule {
     }
 
     public function fetchAction(): Action {
-        return $this->action;
+        return $this->action->setRouteRule($this);
     }
 
     public function fetchArguments(): array {

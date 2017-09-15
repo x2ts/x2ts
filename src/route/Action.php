@@ -12,6 +12,7 @@ use x2ts\route\event\PreActionEvent;
 use x2ts\route\event\PreRunEvent;
 use x2ts\route\http\Request;
 use x2ts\route\http\Response;
+use x2ts\route\rule\IRule;
 use x2ts\TGetterSetter;
 use x2ts\Toolkit;
 use x2ts\view\IView;
@@ -42,7 +43,25 @@ abstract class Action {
      */
     public $response;
 
+    /**
+     * @var string
+     */
     public $suffix;
+
+    /**
+     * @var IRule
+     */
+    public $routeRule;
+
+    /**
+     * @param IRule $rule
+     *
+     * @return $this
+     */
+    public function setRouteRule(IRule $rule): Action {
+        $this->routeRule = $rule;
+        return $this;
+    }
 
     public function init() { }
 

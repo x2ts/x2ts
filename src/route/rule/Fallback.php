@@ -22,7 +22,10 @@ class Fallback implements IRule {
 
     public function fetchAction(): Action {
         $class = $this->_conf['fallbackClass'];
-        return new $class();
+        /** @var Action $action */
+        $action = new $class();
+        $action->routeRule = $this;
+        return $action;
     }
 
     public function fetchArguments(): array {

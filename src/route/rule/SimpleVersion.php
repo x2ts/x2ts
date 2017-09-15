@@ -33,6 +33,16 @@ class SimpleVersion implements IRule {
 
     protected $after = '';
 
+    protected $urlVer = 1;
+
+    public function getVer() {
+        return $this->ver;
+    }
+
+    public function getUrlVer() {
+        return $this->urlVer;
+    }
+
     /**
      * @var \x2ts\route\rule\Simple
      */
@@ -58,7 +68,7 @@ class SimpleVersion implements IRule {
         }
         $this->before = $prefix;
         $this->after = $restUri;
-        $this->ver = (int) $ver;
+        $this->urlVer = $this->ver = empty($ver) ? $this->_conf['emptyVersion'] : (int) $ver;
 
         $simple = new Simple();
         for (; $this->ver > 0; $this->ver--) {
@@ -75,7 +85,7 @@ class SimpleVersion implements IRule {
     }
 
     public function fetchAction(): Action {
-        return $this->simple->fetchAction();
+        return $this->simple->fetchAction()->setRouteRule($this);
     }
 
     public function fetchArguments(): array {
