@@ -8,6 +8,7 @@
 
 namespace x2ts;
 require_once __DIR__ . '/xts.php';
+
 use PHPUnit\Framework\TestCase;
 
 class LoggerTest extends TestCase {
@@ -40,5 +41,16 @@ class LoggerTest extends TestCase {
             ['emerg', 'emergency'],
             ['emergency', 'emergency'],
         ];
+    }
+
+    public function testILogString() {
+        T::logger()->warn(new class implements ILogString {
+            public function toLogString(): string {
+                return 'ILogString';
+            }
+        });
+        system('tail -n 1 ' . $this->logFile);
+        $this->getActualOutput();
+        $this->expectOutputRegex("/\[warning\]\[\d+\]\[x2ts\\\\LoggerTest::testILogString\]ILogString/");
     }
 }
