@@ -141,15 +141,8 @@ class Logger extends Component {
      * @param int   $traceIndex
      */
     public function log($msg, $level, $traceIndex = 1) {
-        if ($msg instanceof \x2ts\rpc\RemoteException) {
-            $logMessage = sprintf(
-                "%s is thrown at remote file %s(%d) with message: %s\nRemote call stack:\n%s",
-                get_class($msg),
-                $msg->remoteFile,
-                $msg->remoteLine,
-                $msg->remoteMessage,
-                $msg->remoteCallStack
-            );
+        if ($msg instanceof ILogString) {
+            $logMessage = $msg->toLogString();
         } else if ($msg instanceof Throwable) {
             $logMessage = sprintf(
                 "%s is thrown at %s(%d) with message: %s\nCall stack:\n%s",
