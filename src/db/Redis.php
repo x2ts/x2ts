@@ -94,4 +94,25 @@ class Redis extends PhpRedis implements IComponent {
             $this->$name = $value;
         }
     }
+
+    protected $delayDelKeys = [];
+
+    public function delayDel($keys, ...$keyn) {
+        if (is_array($keys)) {
+            foreach ($keys as $key) {
+                $this->delayDelKeys[] = $key;
+            }
+        } else {
+            $this->delayDelKeys[] = $keys;
+        }
+        foreach ($keyn as $key) {
+            $this->delayDelKeys[] = $key;
+        }
+    }
+
+    public function __destruct() {
+        if (count($this->delayDelKeys)) {
+            $this->del($this->delayDelKeys);
+        }
+    }
 }
