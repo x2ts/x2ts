@@ -11,6 +11,7 @@ namespace x2ts\route\rule;
 use x2ts\route\Action;
 use x2ts\TGetterSetter;
 use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
 /**
  * Class Simple
@@ -78,6 +79,10 @@ class Simple implements IRule {
             if ($this->action instanceof Action) {
                 $this->action->suffix = $suffix;
                 return true;
+            } else {
+                X::logger()->warn('Class ' . get_class($this->action) .
+                    " is in the action namespace but not an instance of x2ts\\route\\Action.\n" .
+                    "Please check the inheriting chain.");
             }
             array_unshift($this->args, array_pop($parts));
         }
