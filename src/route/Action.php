@@ -53,6 +53,20 @@ abstract class Action {
      */
     public $routeRule;
 
+    private static function decodeUrlEncodedForm(string $input): array {
+        if ($input !== '' && strpos($input, '=') === false) {
+            X::logger()->warn("Invalid url encoded form string:\n$input");
+            return [];
+        }
+        $form = [];
+        $pairs = explode('&', $input);
+        foreach ($pairs as $pair) {
+            list($key, $value) = explode('=', $pair, 2);
+            $form[urldecode($key)] = urldecode($value);
+        }
+        return $form;
+    }
+
     /**
      * @param IRule $rule
      *
@@ -254,10 +268,15 @@ abstract class Action {
             return $this->query();
         }
 
-        if (strpos($contentType, 'application/x-www-form-urlencoded') === 0 ||
-            strpos($contentType, 'multipart/form-data') === 0
+        if ($this->server('REQUEST_METHOD') === 'POST' &&
+            (strpos($contentType, 'application/x-www-form-urlencoded') === 0 ||
+                strpos($contentType, 'multipart/form-data') === 0)
         ) {
             return $this->post();
+        }
+
+        if (strpos($contentType, 'application/x-www-form-urlencoded') === 0) {
+            return self::decodeUrlEncodedForm($this->request->getRawContent());
         }
 
         if (strpos($contentType, 'application/json') === 0 ||
