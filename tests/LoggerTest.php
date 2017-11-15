@@ -15,6 +15,7 @@ class LoggerTest extends TestCase {
     private $logFile = X_RUNTIME_ROOT . '/app.log';
 
     /**
+     * @param $func
      * @param $level
      *
      * @dataProvider levelData

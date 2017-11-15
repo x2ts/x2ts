@@ -783,7 +783,7 @@ namespace {
                 }
                 if (null != $e->getTemplateLine() && null != $e->getTag()) {
                     $rows = explode("\n", htmlspecialchars($this->tpl['source']));
-                    $rows[$e->getTemplateLine()] = '<font color=red>' . $rows[$e->getTemplateLine()] . '</font>';
+                    $rows[$e->getTemplateLine()] = '<span style="color:red">' . $rows[$e->getTemplateLine()] . '</span>';
                     $output .= '<h3>template code</h3>' . implode('<br />', $rows) . '</pre>';
                 }
             }

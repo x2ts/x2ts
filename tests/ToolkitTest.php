@@ -3,6 +3,7 @@
 namespace x2ts;
 
 require_once __DIR__ . '/xts.php';
+
 use Exception;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -14,6 +15,10 @@ use Throwable;
 class ToolkitTest extends TestCase {
     /**
      * @dataProvider dataForToCamelCase
+     *
+     * @param $name
+     * @param $pascal
+     * @param $result
      */
     public function testToCamelCase($name, $pascal, $result) {
         static::assertEquals($result, Toolkit::toCamelCase($name, $pascal));
