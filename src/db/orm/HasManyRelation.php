@@ -8,7 +8,7 @@
 
 namespace x2ts\db\orm;
 
-use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
 class HasManyRelation extends Relation {
 
@@ -28,7 +28,7 @@ class HasManyRelation extends Relation {
         $offset = null,
         $limit = null
     ) {
-        Toolkit::trace("Relation load {$this->name}");
+        X::logger()->trace("Relation load {$this->name}");
         $condition = $this->foreignTableField . '=:_fk' .
             ((null === $condition || '' === $condition) ?
                 '' : " AND $condition");

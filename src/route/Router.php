@@ -9,7 +9,6 @@ use x2ts\route\event\PreRouteEvent;
 use x2ts\route\http\Request;
 use x2ts\route\http\Response;
 use x2ts\route\rule\IRule;
-use x2ts\Toolkit;
 
 /**
  * Class Router
@@ -85,7 +84,7 @@ class Router extends Component {
         $res->setHeader('Status', 404, true, 404);
         $res->setBody('Not Found');
         $res->response();
-        Toolkit::trace("Action not found: $uri");
+        X::logger()->trace("Action not found: $uri");
         return false;
     }
 

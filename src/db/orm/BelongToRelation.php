@@ -8,8 +8,7 @@
 
 namespace x2ts\db\orm;
 
-
-use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
 class BelongToRelation extends Relation {
     /** @noinspection MoreThanThreeArgumentsInspection
@@ -28,9 +27,9 @@ class BelongToRelation extends Relation {
         $offset = null,
         $limit = null
     ) {
-        Toolkit::trace("Relation load {$this->name}");
+        X::logger()->trace("Relation load {$this->name}");
         if (null === $model->properties[$this->property]) {
-            Toolkit::trace("Property {$this->property} is null");
+            X::logger()->trace("Property {$this->property} is null");
             return null;
         }
         $condition = $this->foreignTableField . '=:_fk' .

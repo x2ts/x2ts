@@ -3,6 +3,7 @@
 namespace x2ts\cache;
 
 use x2ts\Component;
+use x2ts\ComponentFactory as X;
 use x2ts\IOException;
 use x2ts\MethodNotImplementException;
 use x2ts\Toolkit;
@@ -18,7 +19,7 @@ class CCache extends Component implements ICache {
     );
 
     public function init() {
-        Toolkit::trace('CCache init');
+        X::logger()->trace('CCache init');
         if (
             !@mkdir($this->conf['cacheDir'], 0777, true) &&
             !is_dir($this->conf['cacheDir'])
@@ -42,11 +43,11 @@ class CCache extends Component implements ICache {
             /** @noinspection PhpIncludeInspection */
             $r = require $file;
             if (!empty($r) && $key === $r['key'] && (0 === $r['expiration'] || time() <= $r['expiration'])) {
-                Toolkit::trace("CCache hit $key");
+                X::logger()->trace("CCache hit $key");
                 return $r['data'];
             }
         }
-        Toolkit::trace("CCache miss $key");
+        X::logger()->trace("CCache miss $key");
         return false;
     }
 
@@ -59,7 +60,7 @@ class CCache extends Component implements ICache {
      * @throws \x2ts\UncompilableException
      */
     public function set($key, $value, $duration) {
-        Toolkit::trace("CCache set $key expire in $duration");
+        X::logger()->trace("CCache set $key expire in $duration");
         $file = $this->key2file($key);
         $content = array(
             'key'        => $key,
@@ -79,7 +80,7 @@ class CCache extends Component implements ICache {
      * @return boolean
      */
     public function remove($key) {
-        Toolkit::trace("CCache remove $key");
+        X::logger()->trace("CCache remove $key");
         $file = $this->key2file($key);
         if (is_file($file)) {
             unlink($file);

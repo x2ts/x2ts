@@ -196,12 +196,23 @@ abstract class Toolkit {
         return $word . 's';
     }
 
+    /**
+     * @param mixed $msg
+     *
+     * @deprecated This method is deprecated, use X::logger()->trace($msg) instead
+     */
     public static function trace($msg) {
         /** @var Logger $logger */
         $logger = ComponentFactory::getComponent('logger');
         $logger->log($msg, X_LOG_DEBUG, 2);
     }
 
+    /**
+     * @param mixed $msg
+     * @param int   $logLevel
+     *
+     * @deprecated This method is deprecated, use X::logger()->log($msg, $logLevel) instead
+     */
     public static function log($msg, $logLevel = X_LOG_DEBUG) {
         /** @var Logger $logger */
         $logger = ComponentFactory::getComponent('logger');

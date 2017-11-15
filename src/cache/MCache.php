@@ -4,7 +4,7 @@ namespace x2ts\cache;
 
 use Memcache;
 use x2ts\Component;
-use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
 /**
  * Class MCache
@@ -34,11 +34,11 @@ class MCache extends Component implements ICache {
         $key = $this->conf['keyPrefix'] . $key;
         $s = $this->cache->get($key);
         if ($s === false) {
-            Toolkit::trace("MCache miss $key");
+            X::logger()->trace("MCache miss $key");
             return false;
         }
 
-        Toolkit::trace("MCache hit $key");
+        X::logger()->trace("MCache hit $key");
         /** @noinspection UnserializeExploitsInspection */
         return is_numeric($s) ? $s : unserialize($s);
     }
@@ -52,7 +52,7 @@ class MCache extends Component implements ICache {
      */
     public function set($key, $value, $duration) {
         $key = $this->conf['keyPrefix'] . $key;
-        Toolkit::trace("MCache set $key");
+        X::logger()->trace("MCache set $key");
         $s = is_numeric($value) ? $value : serialize($value);
         $this->cache->set($key, $s, 0, $duration);
     }
@@ -64,7 +64,7 @@ class MCache extends Component implements ICache {
      */
     public function remove($key) {
         $key = $this->conf['keyPrefix'] . $key;
-        Toolkit::trace("MCache remove $key");
+        X::logger()->trace("MCache remove $key");
         return $this->cache->delete($key);
     }
 
@@ -72,7 +72,7 @@ class MCache extends Component implements ICache {
      * @return void
      */
     public function flush() {
-        Toolkit::trace('MCache flush');
+        X::logger()->trace('MCache flush');
         $this->cache->flush();
     }
 
@@ -84,7 +84,7 @@ class MCache extends Component implements ICache {
      */
     public function inc($key, $step = 1) {
         $key = $this->conf['keyPrefix'] . $key;
-        Toolkit::trace("MCache inc $key by $step");
+        X::logger()->trace("MCache inc $key by $step");
         return $this->cache->increment($key, $step);
     }
 
@@ -96,7 +96,7 @@ class MCache extends Component implements ICache {
      */
     public function dec($key, $step = 1) {
         $key = $this->conf['keyPrefix'] . $key;
-        Toolkit::trace("MCache dec $key by $step");
+        X::logger()->trace("MCache dec $key by $step");
         return $this->cache->decrement($key, $step);
     }
 
@@ -105,7 +105,7 @@ class MCache extends Component implements ICache {
      */
     public function getCache() {
         if (!$this->_cache instanceof Memcache) {
-            Toolkit::trace('MCache init');
+            X::logger()->trace('MCache init');
             $this->_cache = new Memcache();
             $conf = $this->conf;
             if (static::$_conf['persistent']) {

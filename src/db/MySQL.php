@@ -6,8 +6,8 @@ use PDO;
 use PDOException;
 use PDOStatement;
 use x2ts\Component;
+use x2ts\ComponentFactory as X;
 use x2ts\ExtensionNotLoadedException;
-use x2ts\Toolkit;
 
 define('MYSQL_ERR_DUP_ENTRY', 1062);
 define('MYSQL_ERR_FK_PREVENT_DEL', 1451);
@@ -66,7 +66,7 @@ class MySQL extends Component implements IDataBase {
                 $r = $st->fetchAll(PDO::FETCH_NUM);
             }
             if (!$r[0][0]) {
-                Toolkit::log('MySQL has gone away, re-init it', X_LOG_WARNING);
+                X::logger()->warn('MySQL has gone away, re-init it');
                 $this->initPdo();
             } else {
                 $this->mysqlLiveCheckTime = time() + $this->conf['mysqlCheckDuration'];
@@ -105,7 +105,7 @@ class MySQL extends Component implements IDataBase {
      * @return array
      */
     public function query(string $sql, array $params = []) {
-        Toolkit::trace("$sql with params " . $this->serializeArray($params));
+        X::logger()->trace("$sql with params " . $this->serializeArray($params));
         try {
             $st = $this->pdo->prepare($sql);
             if ($st === false) {
@@ -121,7 +121,7 @@ class MySQL extends Component implements IDataBase {
             $e = $st->errorInfo();
             throw new DataBaseException($e[2], $e[1]);
         } catch (PDOException $ex) {
-            Toolkit::trace($ex);
+            X::logger()->trace($ex);
             throw new DataBaseException($ex->getMessage(), $ex->getCode(), $ex);
         }
     }
@@ -160,8 +160,6 @@ class MySQL extends Component implements IDataBase {
     public function getAffectedRows() {
         return $this->_affectedRows;
     }
-
-    private $inTransaction = false;
 
     /**
      * @return boolean

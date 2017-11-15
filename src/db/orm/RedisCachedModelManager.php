@@ -9,7 +9,7 @@
 namespace x2ts\db\orm;
 
 
-use x2ts\ComponentFactory;
+use x2ts\ComponentFactory as X;
 use x2ts\db\Redis;
 use x2ts\Toolkit;
 
@@ -65,7 +65,7 @@ final class RedisCachedModelManager implements IModelManager {
 
     public function redis(): Redis {
         /** @noinspection PhpIncompatibleReturnTypeInspection */
-        return ComponentFactory::getComponent($this->conf['redisId']);
+        return X::getComponent($this->conf['redisId']);
     }
 
     /**
@@ -74,24 +74,21 @@ final class RedisCachedModelManager implements IModelManager {
      * @return null|Model
      */
     public function load($pk) {
-        Toolkit::trace("Redis cached load $pk");
+        X::logger()->trace("Redis cached load $pk");
         $key = $this->getPoolKey($pk);
         /** @noinspection UnserializeExploitsInspection */
         $model = @unserialize($this->redis()->get($key));
 
         if ($model instanceof Model) {
-            Toolkit::trace("Hit load $key");
+            X::logger()->trace("Hit load $key");
             if ($model->isNewRecord || count($model->modified) > 0) {
-                Toolkit::log(
-                    "The cache of {$model->tableName}-{$model->pk} is polluted",
-                    X_LOG_WARNING
-                );
+                X::logger()->warn("The cache of {$model->tableName}-{$model->pk} is polluted");
                 return $this->loadFromDb($pk);
             }
             return $this->model->setup($model->properties);
         }
 
-        Toolkit::trace("Miss load $key");
+        X::logger()->trace("Miss load $key");
         return $this->loadFromDb($pk);
     }
 
@@ -102,7 +99,7 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function save(int $scenario = Model::INSERT_NORMAL) {
-        Toolkit::trace('Redis cached save');
+        X::logger()->trace('Redis cached save');
         $result = DirectModelManager::getInstance($this->model)
             ->save($scenario);
         $this->removeAllRelatedCache();
@@ -116,7 +113,7 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function remove($pk = null) {
-        Toolkit::trace('Redis cached remove');
+        X::logger()->trace('Redis cached remove');
         $result = DirectModelManager::getInstance($this->model)->remove($pk);
         $this->removeAllRelatedCache();
         return $result;
@@ -132,17 +129,17 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function many(string $condition = '', array $params = array(), $offset = null, $limit = null) {
-        Toolkit::trace('Redis cached many');
+        X::logger()->trace('Redis cached many');
         $key = $this->getManyKey($condition, $params, $offset, $limit);
         /** @var array $pks */
         /** @noinspection UnserializeExploitsInspection */
         $pks = @unserialize($this->redis()->get($key));
         if (is_array($pks)) {
-            Toolkit::trace("Hit many $key");
+            X::logger()->trace("Hit many $key");
             return $this->pks2models($pks);
         }
 
-        Toolkit::trace("Miss many $key");
+        X::logger()->trace("Miss many $key");
         return $this->manySet($key,
             DirectModelManager::getInstance($this->model)
                 ->many($condition, $params, $offset, $limit)
@@ -157,15 +154,15 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function one(string $condition = '', array $params = []) {
-        Toolkit::trace('Redis cached one');
+        X::logger()->trace('Redis cached one');
         $key = $this->getOneKey($condition, $params);
         $pk = $this->redis()->get($key);
         if ($pk) {
-            Toolkit::trace("Hit one $key");
+            X::logger()->trace("Hit one $key");
             return $this->load($pk);
         }
 
-        Toolkit::trace("Miss one $key");
+        X::logger()->trace("Miss one $key");
         $model = DirectModelManager::getInstance($this->model)
             ->one($condition, $params);
         if ($model) {
@@ -176,7 +173,7 @@ final class RedisCachedModelManager implements IModelManager {
             );
             $this->poolSet($model);
         }
-        Toolkit::trace("Saved one $key");
+        X::logger()->trace("Saved one $key");
         return $model;
     }
 
@@ -188,16 +185,16 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function sql(string $sql, array $params = array()) {
-        Toolkit::trace('Redis cached sql');
+        X::logger()->trace('Redis cached sql');
         $key = $this->getSqlKey($sql, $params);
         /** @noinspection UnserializeExploitsInspection */
         $pks = @unserialize($this->redis()->get($key));
         if ($pks) {
-            Toolkit::trace("Hit sql $key");
+            X::logger()->trace("Hit sql $key");
             return $this->pks2models($pks);
         }
 
-        Toolkit::trace("Miss sql $key");
+        X::logger()->trace("Miss sql $key");
         return $this->manySet($key,
             DirectModelManager::getInstance($this->model)
                 ->sql($sql, $params)
@@ -212,11 +209,11 @@ final class RedisCachedModelManager implements IModelManager {
      * @throws \x2ts\db\DataBaseException
      */
     public function count(string $condition = '', array $params = array()) {
-        Toolkit::trace('Redis cached count');
+        X::logger()->trace('Redis cached count');
         $key = $this->getCountKey($condition, $params);
         $count = $this->redis()->get($key);
         if (!is_int($count) && !ctype_digit($count)) {
-            Toolkit::trace("Miss count $key");
+            X::logger()->trace("Miss count $key");
             $count = DirectModelManager::getInstance($this->model)
                 ->count($condition, $params);
             $this->set(
@@ -224,9 +221,9 @@ final class RedisCachedModelManager implements IModelManager {
                 $count,
                 $this->conf['duration']['count']
             );
-            Toolkit::trace("Saved count $key $count");
+            X::logger()->trace("Saved count $key $count");
         } else {
-            Toolkit::trace("Hit count $key $count");
+            X::logger()->trace("Hit count $key $count");
             $count = (int) $count;
         }
         return $count;
@@ -278,13 +275,13 @@ final class RedisCachedModelManager implements IModelManager {
      */
     private function poolSet(Model $model) {
         $key = $this->getPoolKey($model->pk);
-        Toolkit::trace("Save $key to pool");
+        X::logger()->trace("Save $key to pool");
         $this->redis()->set(
             $key,
             serialize($model),
             $this->conf['duration']['pool']
         );
-        Toolkit::trace("Saved pool $key");
+        X::logger()->trace("Saved pool $key");
         return $this;
     }
 
@@ -340,12 +337,12 @@ final class RedisCachedModelManager implements IModelManager {
             serialize($pks),
             $this->conf['duration']['many']
         );
-        Toolkit::trace("Saved many $key");
+        X::logger()->trace("Saved many $key");
         return $models;
     }
 
     private function loadFromDb($pk) {
-        Toolkit::trace("Load from database $pk");
+        X::logger()->trace("Load from database $pk");
         if (DirectModelManager::getInstance($this->model)->load($pk)) {
             $this->poolSet($this->model);
             return $this->model;
@@ -364,14 +361,14 @@ final class RedisCachedModelManager implements IModelManager {
 
     public function removeAllRelatedCache() {
         $groupKey = $this->group();
-        Toolkit::trace("Redis remove all related cache $groupKey");
+        X::logger()->trace("Redis remove all related cache $groupKey");
         $keysInGroup = $this->redis()->sMembers($groupKey);
         if (!$keysInGroup) {
             $keysInGroup = [];
         }
         $num = $this->redis()->del($this->getPoolKey(), ...$keysInGroup);
         $this->redis()->del($groupKey);
-        Toolkit::trace("$num keys removed");
+        X::logger()->trace("$num keys removed");
         return $num;
     }
 }

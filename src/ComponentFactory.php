@@ -167,10 +167,21 @@ abstract class ComponentFactory extends Component {
         return $component;
     }
 
+    /**
+     * @param mixed $msg
+     * @param int   $level
+     *
+     * @deprecated This method is deprecated, use logger instead
+     */
     public static function log($msg, $level = X_LOG_DEBUG) {
         static::logger()->log($msg, $level, 2);
     }
 
+    /**
+     * @param mixed $msg
+     *
+     * @deprecated This method is deprecated, use logger instead
+     */
     public static function trace($msg) {
         static::logger()->log($msg, X_LOG_DEBUG, 2);
     }

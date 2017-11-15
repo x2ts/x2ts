@@ -2,7 +2,7 @@
 
 namespace {
 
-    use x2ts\Toolkit;
+    use x2ts\ComponentFactory as X;
 
     class AirTPL {
         public static function conf($conf = array()) {
@@ -169,7 +169,7 @@ namespace {
             }
             // create directories
             if (!@mkdir(self::$compile_dir, 0755, true) && !is_dir(self::$compile_dir)) {
-                Toolkit::log(error_get_last(), X_LOG_ERROR);
+                X::logger()->error(error_get_last());
                 throw new AirTpl_Exception('Cannot create compile dir');
             }
             // if the output dir is not writable throw an error

@@ -469,7 +469,7 @@ class Model extends Component implements
         int $offset = 0,
         int $limit = 200
     ) {
-        Toolkit::trace("Loading relation $name");
+        X::logger()->trace("Loading relation $name");
         if (array_key_exists($name, $this->relations)) {
             $relation = $this->relations[$name];
             return $relation->fetchRelated($this, $condition, $params, $offset, $limit);

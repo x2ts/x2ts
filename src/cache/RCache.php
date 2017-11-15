@@ -4,7 +4,7 @@ namespace x2ts\cache;
 
 use Redis;
 use x2ts\Component;
-use x2ts\Toolkit;
+use x2ts\ComponentFactory as X;
 
 /**
  * Class RCache
@@ -37,11 +37,11 @@ class RCache extends Component implements ICache {
     public function get($key) {
         $s = $this->cache->get($key);
         if ($s === false) {
-            Toolkit::trace("RCache Miss '$key'");
+            X::logger()->trace("RCache Miss '$key'");
             return false;
         }
 
-        Toolkit::trace("RCache Hit '$key'");
+        X::logger()->trace("RCache Hit '$key'");
         /** @noinspection UnserializeExploitsInspection */
         return is_numeric($s) ? $s : unserialize($s);
     }
@@ -54,7 +54,7 @@ class RCache extends Component implements ICache {
      * @return void
      */
     public function set($key, $value, $duration = 0) {
-        Toolkit::trace("RCache Set $key");
+        X::logger()->trace("RCache Set $key");
         $s = is_numeric($value) ? $value : serialize($value);
         if ($duration) {
             $this->cache->set($key, $s, $duration);
@@ -69,7 +69,7 @@ class RCache extends Component implements ICache {
      * @return void
      */
     public function remove($key) {
-        Toolkit::trace("RCache remove '$key'");
+        X::logger()->trace("RCache remove '$key'");
         $this->cache->delete($key);
     }
 
@@ -77,7 +77,7 @@ class RCache extends Component implements ICache {
      * @return void
      */
     public function flush() {
-        Toolkit::trace('RCache flush');
+        X::logger()->trace('RCache flush');
         $this->cache->flushDB();
     }
 
@@ -88,7 +88,7 @@ class RCache extends Component implements ICache {
      * @return int
      */
     public function inc($key, $step = 1) {
-        Toolkit::trace("RCache inc '$key' by $step");
+        X::logger()->trace("RCache inc '$key' by $step");
         if ($step > 1) {
             return $this->cache->incrBy($key, $step);
         }
@@ -103,7 +103,7 @@ class RCache extends Component implements ICache {
      * @return int
      */
     public function dec($key, $step = 1) {
-        Toolkit::trace("RCache dec '$key' by $step");
+        X::logger()->trace("RCache dec '$key' by $step");
         if ($step > 1) {
             return $this->cache->decrBy($key, $step);
         }
@@ -116,7 +116,7 @@ class RCache extends Component implements ICache {
      */
     public function getCache() {
         if (!$this->_cache instanceof Redis) {
-            Toolkit::trace('RCache init');
+            X::logger()->trace('RCache init');
             $this->_cache = new Redis();
             $conf = $this->conf;
             if ($conf['persistent']) {

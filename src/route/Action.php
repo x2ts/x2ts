@@ -120,7 +120,7 @@ abstract class Action {
     }
 
     public function run(array $args = []) {
-        Toolkit::trace('App Start: '
+        X::logger()->trace('App Start: '
             . $this->server('REQUEST_METHOD') . ' ' . $this->server('REQUEST_URI')
         );
         X::bus()->dispatch(new PreActionEvent([
@@ -139,19 +139,19 @@ abstract class Action {
             ]));
         } catch (ApplicationExitException $e) {
             if ($m = $e->getMessage()) {
-                Toolkit::trace('App end with message ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+                X::logger()->trace('App end with message ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             } else {
-                Toolkit::trace('App end without message' . "\n" . $e->getTraceAsString());
+                X::logger()->trace('App end without message' . "\n" . $e->getTraceAsString());
             }
         } catch (Throwable $e) {
-            Toolkit::log($e, X_LOG_ERROR);
+            X::logger()->error($e);
         }
         X::bus()->dispatch(new PostActionEvent([
             'dispatcher' => $this,
             'action'     => $this,
         ]));
         $this->response->response();
-        Toolkit::trace('App Exit: '
+        X::logger()->trace('App Exit: '
             . $this->server('REQUEST_METHOD') . ' ' . $this->server('REQUEST_URI')
         );
     }
@@ -240,21 +240,21 @@ abstract class Action {
             $tpl = $args[4] ?? null;
         }
         if ($this->is_ajax || $this->json_expected) {
-            Toolkit::trace('Output JSON');
+            X::logger()->trace('Output JSON');
             $this->jsonError($code, $message, $data, $goto);
         } else {
             if (!empty($goto)) {
-                Toolkit::trace("Redirect to $goto");
+                X::logger()->trace("Redirect to $goto");
                 $this->redirect($goto);
             } else {
                 if (null !== $message && !isset($data['message'])) {
                     $data['message'] = $message;
                 }
                 if ($tpl) {
-                    Toolkit::trace("Display with tpl $tpl");
+                    X::logger()->trace("Display with tpl $tpl");
                     $this->display($tpl, $data);
                 } else {
-                    Toolkit::trace('Display');
+                    X::logger()->trace('Display');
                     $this->display($data);
                 }
             }
