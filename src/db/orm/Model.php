@@ -31,7 +31,7 @@ use Yaf\Exception\TypeError;
  * @property-read mixed         $pk
  * @property-read string        $pkName
  * @property-read string        $tableName
- * @property-read array         $relations
+ * @property-read Relation[]    $relations
  * @property-read SqlBuilder    $builder
  * @property-read IModelManager $modelManager
  */
@@ -184,6 +184,84 @@ class Model extends Component implements
         return $this->modelManager->one($condition, $params);
     }
 
+    protected $_with = [];
+
+    public function with(...$args) {
+        foreach ($args as $idx => $val) {
+            if (is_array($val)) {
+                $withOne = $val;
+            } elseif ($val instanceof BatchLoader) {
+                $withOne = [$val];
+            } elseif (is_string($val)) {
+                $withOne = explode('.', $val);
+            } else {
+                $traces = debug_backtrace();
+                throw new \TypeError(sprintf(
+                    'Argument %d passed to %s must be of the type %s, %s given, called in %s on line %d',
+                    $idx + 1,
+                    __METHOD__,
+                    'string, array or x2ts\db\orm\BatchLoader',
+                    gettype($val),
+                    $traces[1]['file'],
+                    $traces[1]['line']
+                ));
+            }
+            $key = key($withOne);
+            if ($key === 0) {
+                $first = array_shift($withOne);
+                $with = count($withOne) ? [$withOne] : [];
+            } else {
+                $withZero = explode('.', $key);
+                $first = array_shift($withZero);
+                if (count($withZero)) {
+                    $last = array_pop($withZero);
+                    $withZero[$last] = $withOne[$key];
+                    $with = [$withZero];
+                } else {
+                    $with = [];
+                    if (is_array($withOne[$key])) {
+                        foreach ($withOne[$key] as $k => $v) {
+                            if (is_int($k)) {
+                                $with[] = $v;
+                            } else {
+                                $with[] = [$k => $v];
+                            }
+                        }
+                    } else {
+                        $with[] = $withOne[$key];
+                    }
+                }
+            }
+            unset($withOne);
+            if ($first instanceof BatchLoader) {
+                $name = $first->name();
+                $loader = $first;
+            } else {
+                $name = $first;
+                if (!isset($this->relations[$name])) {
+                    throw new UnresolvableRelationException(sprintf(
+                        'The relation named %s cannot be resolved in class %s',
+                        $name,
+                        get_class($this)
+                    ));
+                }
+                $loader = $this->relations[$name];
+            }
+
+            if (!isset($this->_with[$name])) {
+                $this->_with[$name] = [
+                    'loader' => $loader,
+                    'with'   => $with,
+                ];
+            } elseif (count($with)) {
+                foreach ($with as $withOne) {
+                    $this->_with[$name]['with'][] = $withOne;
+                }
+            }
+        }
+        return $this;
+    }
+
     /** @noinspection MoreThanThreeArgumentsInspection
      * @param string $condition
      * @param array  $params
@@ -193,7 +271,25 @@ class Model extends Component implements
      * @return array
      */
     public function many(string $condition = '', array $params = array(), $offset = null, $limit = null) {
-        return $this->modelManager->many($condition, $params, $offset, $limit);
+        return $this->loadWiths($this->modelManager->many($condition, $params, $offset, $limit));
+    }
+
+    /**
+     * @param array $models
+     *
+     * @return array
+     */
+    protected function loadWiths(array $models) {
+        if ($models && $this->_with) {
+            foreach ($this->_with as $w) {
+                /** @var BatchLoader $loader */
+                $loader = $w['loader'];
+                $subWith = $w['with'];
+                $loader->batchLoadFor($models, $subWith);
+            }
+            $this->_with = [];
+        }
+        return $models;
     }
 
     /**
@@ -214,7 +310,7 @@ class Model extends Component implements
      * @throws \x2ts\db\DataBaseException
      */
     public function sql(string $sql, array $params = []) {
-        return $this->modelManager->sql($sql, $params);
+        return $this->loadWiths($this->modelManager->sql($sql, $params));
     }
 
     /**
@@ -408,17 +504,12 @@ class Model extends Component implements
 
     public function __get($name) {
         $getter = Toolkit::toCamelCase("get $name");
-        $snakeName = Toolkit::to_snake_case($name);
         if (method_exists($this, $getter)) {
             return $this->$getter();
         }
 
         if (array_key_exists($name, $this->_properties)) {
             return $this->_properties[$name];
-        }
-
-        if (array_key_exists($snakeName, $this->_properties)) {
-            return $this->_properties[$snakeName];
         }
 
         if (array_key_exists($name, $this->relations)) {
@@ -434,8 +525,13 @@ class Model extends Component implements
         $setter = Toolkit::toCamelCase("set $name");
         if (method_exists($this, $setter)) {
             $this->$setter($value);
-        } else {
+        } elseif (array_key_exists($name, $this->_properties)) {
             $this->_propertySet($name, $value);
+        } elseif ($value instanceof Model &&
+            ($relation = $this->relations[$name] ?? false) &&
+            $value->modelName === $relation->foreignModelName
+        ) {
+            $this->_relationObjects[$name] = $value;
         }
     }
 

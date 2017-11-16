@@ -50,4 +50,40 @@ class HasOneRelation extends Relation {
     public static function __set_state($properties) {
         return new self($properties);
     }
+
+    /**
+     * @param Model[] $models
+     * @param array   $subWiths
+     *
+     * @return void
+     */
+    public function batchLoadFor($models, $subWiths) {
+        X::logger()->trace("Batch load relation models {$this->name}");
+        if (count($models) === 0) {
+            return;
+        }
+
+        $ids = [];
+        foreach ($models as $model) {
+            $val = $model->properties[$this->property];
+            if (is_string($val)) {
+                $ids[] = "'$val'";
+            } else {
+                $ids[] = $val;
+            }
+        }
+        $idStr = implode(',', $ids);
+        $model = reset($models);
+        /** @var Model[] $foreignModels */
+        $foreignModels = Model::getInstance([$this->foreignModelName], $model->conf, $model->confHash)
+            ->with(...$subWiths)
+            ->many($this->foreignTableField . " IN ($idStr)");
+        $fMap = [];
+        foreach ($foreignModels as $foreignModel) {
+            $fMap[$foreignModel->properties[$this->foreignTableField]] = $foreignModel;
+        }
+        foreach ($models as $model) {
+            $model->{$this->name} = $fMap[$model->properties[$this->property]] ?? null;
+        }
+    }
 }

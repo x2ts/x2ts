@@ -9,6 +9,7 @@
 namespace x2ts\db\orm;
 
 use x2ts\ComponentFactory as X;
+use x2ts\MethodNotImplementException;
 
 class HasManyRelation extends Relation {
 
@@ -49,5 +50,16 @@ class HasManyRelation extends Relation {
      */
     public static function __set_state($properties) {
         return new self($properties);
+    }
+
+    /**
+     * @param Model[] $models
+     * @param array   $subWiths
+     *
+     * @return void
+     * @throws MethodNotImplementException
+     */
+    public function batchLoadFor($models, $subWiths) {
+        throw new MethodNotImplementException('HasManyRelation is unable to be load with');
     }
 }

@@ -10,6 +10,7 @@ namespace x2ts\db\orm;
 
 
 use x2ts\ComponentFactory as X;
+use x2ts\MethodNotImplementException;
 
 class ManyManyRelation extends Relation {
     public $relationTableName;
@@ -70,5 +71,16 @@ SQL
      */
     public static function __set_state($properties) {
         return new self($properties);
+    }
+
+    /**
+     * @param Model[] $models
+     * @param array   $subWiths
+     *
+     * @return void
+     * @throws MethodNotImplementException
+     */
+    public function batchLoadFor($models, $subWiths) {
+        throw new MethodNotImplementException('ManyManyRelation is unable to load with');
     }
 }

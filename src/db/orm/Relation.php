@@ -4,16 +4,16 @@ namespace x2ts\db\orm;
 
 use x2ts\ICompilable;
 
-abstract class Relation implements ICompilable {
-    public $name;
+abstract class Relation implements ICompilable, BatchLoader {
+    public $name = '';
 
-    public $property;
+    public $property = '';
 
-    public $foreignModelName;
+    public $foreignModelName = '';
 
-    public $foreignTableName;
+    public $foreignTableName = '';
 
-    public $foreignTableField;
+    public $foreignTableField = '';
 
     public function __construct($array = []) {
         foreach ($array as $key => $value) {
@@ -46,4 +46,11 @@ abstract class Relation implements ICompilable {
         $offset = null,
         $limit = null
     );
+
+    /**
+     * @return string
+     */
+    public function name(): string {
+        return $this->name;
+    }
 }
