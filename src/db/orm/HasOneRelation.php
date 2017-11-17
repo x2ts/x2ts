@@ -65,11 +65,16 @@ class HasOneRelation extends Relation {
 
         $ids = [];
         foreach ($models as $model) {
-            $val = $model->properties[$this->property];
-            if (is_string($val)) {
-                $ids[] = "'$val'";
-            } else {
-                $ids[] = $val;
+            $id = $model->properties[$this->property];
+            if (is_string($id)) {
+                $ids[] = "'$id'";
+            } elseif (is_int($id)) {
+                $ids[] = $id;
+            } elseif ($id !== null) {
+                X::logger()->warn('Unsupported reference type ' . gettype($id)
+                    . ' of ' . get_class($model) . '->' . $this->property
+                    . ' (PK: ' . $model->pk . ')'
+                );
             }
         }
         $idStr = implode(',', $ids);

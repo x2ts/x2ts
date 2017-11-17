@@ -70,8 +70,13 @@ class BelongToRelation extends Relation {
             $id = $model->properties[$this->property];
             if (is_string($id)) {
                 $ids[] = "'$id'";
-            } else {
+            } elseif (is_int($id)) {
                 $ids[] = $id;
+            } elseif ($id !== null) {
+                X::logger()->warn('Unsupported reference type ' . gettype($id)
+                    . ' of ' . get_class($model) . '->' . $this->property
+                    . ' (PK: ' . $model->pk . ')'
+                );
             }
         }
         $idStr = implode(',', $ids);
