@@ -14,7 +14,7 @@ use x2ts\db\SqlBuilder;
 use x2ts\IAssignable;
 use x2ts\MethodNotImplementException;
 use x2ts\Toolkit;
-use Yaf\Exception\TypeError;
+use TypeError;
 
 
 /**
