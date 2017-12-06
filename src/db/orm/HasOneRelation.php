@@ -56,14 +56,11 @@ class HasOneRelation extends Relation {
      * @param array   $subWiths
      *
      * @return void
+     * @throws UnresolvableRelationException
+     * @throws \TypeError
      */
     public function batchLoadFor($models, $subWiths) {
         X::logger()->trace("Batch load relation models {$this->name}");
-        if (count($models) === 0) {
-            return;
-        }
-
-        $ids = [];
         foreach ($models as $model) {
             $id = $model->properties[$this->property];
             if (is_string($id)) {
@@ -76,6 +73,9 @@ class HasOneRelation extends Relation {
                     . ' (PK: ' . $model->pk . ')'
                 );
             }
+        }
+        if (count($ids) === 0) {
+            return;
         }
         $idStr = implode(',', $ids);
         $model = reset($models);

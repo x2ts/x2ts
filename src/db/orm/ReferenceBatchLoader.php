@@ -29,11 +29,10 @@ class ReferenceBatchLoader implements BatchLoader {
      * @param array   $subWiths
      *
      * @return void
+     * @throws UnresolvableRelationException
+     * @throws \TypeError
      */
     public function batchLoadFor($models, $subWiths) {
-        if (count($models) === 0) {
-            return;
-        }
         $ids = [];
         foreach ($models as $model) {
             $id = $model->properties[$this->prop];
@@ -47,6 +46,9 @@ class ReferenceBatchLoader implements BatchLoader {
                     . ' (PK: ' . $model->pk . ')'
                 );
             }
+        }
+        if (count($ids) === 0) {
+            return;
         }
         $idStr = implode(',', $ids);
         /** @var Model[] $foreignModels */
