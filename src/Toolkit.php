@@ -228,4 +228,25 @@ abstract class Toolkit {
             $length
         );
     }
+
+    /**
+     * @param string $v1
+     * @param string $v2
+     * @param string $delimiter
+     *
+     * @return int positive if $v1 > $v2; negative if $v1 < $v2; zero if $v1 = $v2
+     */
+    public static function versionCompare(string $v1, string $v2, string $delimiter = '.'): int {
+        $parts1 = explode($delimiter, $v1);
+        $parts2 = explode($delimiter, $v2);
+        $end = min($len1 = count($parts1), $len2 = count($parts2));
+        for ($i = 0; $i < $end; $i++) {
+            if ($parts1[$i] > $parts2[$i]) {
+                return 1;
+            } elseif ($parts1[$i] < $parts2[$i]) {
+                return -1;
+            }
+        }
+        return $len1 <=> $len2;
+    }
 }

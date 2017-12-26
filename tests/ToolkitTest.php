@@ -300,4 +300,29 @@ class ToolkitTest extends TestCase {
         $chars = Toolkit::randomChars(16);
         static::assertEquals(16, strlen($chars));
     }
+
+    /**
+     * @dataProvider verCmpDP
+     *
+     * @param $v1
+     * @param $v2
+     * @param $d
+     * @param $r
+     */
+    public function testVersionCompare($v1, $v2, $r) {
+        static::assertEquals($r, Toolkit::versionCompare($v1, $v2), "$v1 <=> $v2");
+    }
+
+    public function verCmpDP() {
+        return [
+            ['2.1.1', '2.1.0', 1],
+            ['2.1', '2.1.0', -1],
+            ['2.1.15', '2.1.9', 1],
+            ['2.1', '2.1.', -1],
+            ['2.1', '2.1', 0],
+            ['2.1.5', '2.1.5', 0],
+            ['2.1.3', '2.1.5', -1],
+            ['2.1.01', '2.1.1', 0],
+        ];
+    }
 }
