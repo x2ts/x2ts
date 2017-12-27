@@ -14,6 +14,7 @@ use Monolog\Handler\AbstractHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger as MonoLogger;
 use Throwable;
+use x2ts\log\TraceFormatter;
 
 /**
  * Class Logger
@@ -25,7 +26,8 @@ class Logger extends Component {
     protected static $_conf = [
         'name'     => 'app',
         'handlers' => [
-            // handler class name => [construct args]
+            // handler [class => construct args, ...]
+            // handler [['class' => class name, 'args' => construct args, 'formatter' => FormatterInterface],...]
         ],
     ];
 
@@ -44,43 +46,24 @@ class Logger extends Component {
                     StreamHandler::class => ['php://stderr', MonoLogger::DEBUG],
                 ];
             }
-            foreach ($handlerConfigs as $class => $args) {
-                if (!is_array($args)) {
+            foreach ($handlerConfigs as $key => $value) {
+                if (is_int($key) && isset($value['class'])) {
+                    $class = $value['class'];
+                    $args = $value['args'] ?? [];
+                    $formatter = $value['formatter'] ?? null;
+                } else {
+                    $class = $key;
+                    $args = $value;
+                    $formatter = new TraceFormatter();
+                }
+                if (!is_string($class) || !is_array($args) || !class_exists($class)) {
                     continue;
                 }
                 /** @var AbstractHandler $handler */
                 $handler = new $class(...$args);
-                /** @noinspection PhpParamsInspection */
-                $handler->setFormatter(new class implements FormatterInterface {
-                    public function format(array $record) {
-                        $traceIndex = $record['context']['traceIndex'];
-                        $traces = debug_backtrace();
-                        foreach ($traces as $trace) {
-                            if ($trace['class'] === Logger::class && $trace['function'] === 'log') {
-                                break;
-                            }
-                            $traceIndex++;
-                        }
-
-                        $source = $traceIndex < count($traces) ?
-                            (($traces[$traceIndex]['class'] ?? 'FUNC') . '::' .
-                                $traces[$traceIndex]['function']) :
-                            'GLOBAL';
-                        /** @var \DateTime $datetime */
-                        $datetime = $record['datetime'];
-                        return sprintf('[%s][%s][%d][%s]%s',
-                                $datetime->format('c'),
-                                strtolower($record['level_name']),
-                                getmypid(),
-                                $source,
-                                $record['message']
-                            ) . "\n";
-                    }
-
-                    public function formatBatch(array $records) {
-                        return implode('', array_map([$this, 'format'], $records));
-                    }
-                });
+                if ($formatter instanceof FormatterInterface) {
+                    $handler->setFormatter($formatter);
+                }
                 $this->_logger->pushHandler($handler);
             }
         }
@@ -141,28 +124,38 @@ class Logger extends Component {
      * @param int   $traceIndex
      */
     public function log($msg, $level, $traceIndex = 1) {
-        if ($msg instanceof ILogString) {
-            $logMessage = $msg->toLogString();
-        } else if ($msg instanceof Throwable) {
-            $logMessage = sprintf(
-                "%s is thrown at %s(%d) with message: %s\nCall stack:\n%s",
-                get_class($msg),
-                $msg->getFile(),
-                $msg->getLine(),
-                $msg->getMessage(),
-                $msg->getTraceAsString()
-            );
-        } elseif (is_callable($msg)) {
-            $logMessage = $msg();
-        } elseif (!is_string($msg)) {
-            ob_start();
-            /** @noinspection ForgottenDebugOutputInspection */
-            var_dump($msg);
-            $logMessage = ob_get_contents();
-            ob_end_clean();
-        } else {
-            $logMessage = (string) $msg;
-        }
+        $logMessage = is_string($msg) ? $msg : new class($msg) {
+            private $msg;
+
+            public function __construct($msg) {
+                $this->msg = $msg;
+            }
+
+            public function __toString() {
+                $msg =& $this->msg;
+                if ($msg instanceof ILogString) {
+                    $logMessage = $msg->toLogString();
+                } else if ($msg instanceof Throwable) {
+                    $logMessage = sprintf(
+                        "%s is thrown at %s(%d) with message: %s\nCall stack:\n%s",
+                        get_class($msg),
+                        $msg->getFile(),
+                        $msg->getLine(),
+                        $msg->getMessage(),
+                        $msg->getTraceAsString()
+                    );
+                } elseif (is_callable($msg)) {
+                    $logMessage = $msg();
+                } else {
+                    ob_start();
+                    /** @noinspection ForgottenDebugOutputInspection */
+                    var_dump($msg);
+                    $logMessage = ob_get_contents();
+                    ob_end_clean();
+                }
+                return $logMessage;
+            }
+        };
         /** @noinspection ReturnFalseInspection */
         $this->logger->addRecord($level, $logMessage, ['traceIndex' => $traceIndex]);
     }

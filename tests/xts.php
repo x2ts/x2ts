@@ -12,11 +12,13 @@ ini_set('display_errors', X_DEBUG ? 'On' : 'Off');
 require_once X2ROOT . '/vendor/autoload.php';
 
 use Monolog\Handler\StreamHandler;
+use x2ts\log\TraceFormatter;
 
 /**
  * Class T
  *
  * @method static validator\Validator validator($data)
+ * @method static Logger logger2()
  * @package x2ts
  */
 class T extends ComponentFactory {
@@ -38,6 +40,20 @@ T::conf([
                     StreamHandler::class => [
                         X_RUNTIME_ROOT . '/app.log',
                         X_LOG_DEBUG,
+                    ],
+                ],
+            ],
+        ],
+        'logger2'   => [
+            'class'     => Logger::class,
+            'singleton' => true,
+            'conf'      => [
+                'name'     => 'logger2',
+                'handlers' => [
+                    [
+                        'class'     => StreamHandler::class,
+                        'args'      => [X_RUNTIME_ROOT . '/logger2.log', X_LOG_NOTICE],
+                        'formatter' => new TraceFormatter(),
                     ],
                 ],
             ],

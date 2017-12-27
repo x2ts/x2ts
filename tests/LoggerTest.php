@@ -54,4 +54,15 @@ class LoggerTest extends TestCase {
         $this->getActualOutput();
         $this->expectOutputRegex("/\[warning\]\[\d+\]\[x2ts\\\\LoggerTest::testILogString\]ILogString/");
     }
+
+    const log2File = X_RUNTIME_ROOT . '/logger2.log';
+
+    public function testLoggerLevel() {
+        T::logger2()->warn('hehe');
+        T::logger2()->info('def');
+        T::logger2()->trace('abc');
+        system('tail -n 1 ' . self::log2File);
+        $this->getActualOutput();
+        $this->expectOutputRegex("/\[warning\]\[\d+\]\[x2ts\\\\LoggerTest::testLoggerLevel\]hehe/");
+    }
 }
