@@ -42,7 +42,7 @@ class AmqpHandler extends AbstractProcessingHandler {
      */
     public function getAmqpExchange() {
         if (!$this->connection instanceof \AMQPConnection) {
-            $this->connection = new \AMQPConnection($this->conf);
+            $this->connection = new \AMQPConnection($this->conf['amqp']);
             $this->connection->connect();
         }
         if (!$this->connection->isConnected()) {
