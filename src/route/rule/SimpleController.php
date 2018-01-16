@@ -12,6 +12,12 @@ namespace x2ts\route\rule;
 use x2ts\route\Action;
 use x2ts\Toolkit;
 
+/**
+ * Class SimpleController
+ *
+ * @package x2ts\route\rule
+ * @property-read array $conf
+ */
 class SimpleController implements IRule {
     protected $_conf = [
         'defaultController' => 'index',
@@ -42,6 +48,9 @@ class SimpleController implements IRule {
         }
         $parts = explode('/', trim($path, '/'));
         if (count($parts) < 2) { // at least two parts: controller/action
+            if ($this->conf['defaultController']) {
+                $classFullName = '';
+            }
             return false;
         }
         $this->actionName = array_pop($parts);
