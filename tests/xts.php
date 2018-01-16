@@ -12,6 +12,7 @@ ini_set('display_errors', X_DEBUG ? 'On' : 'Off');
 require_once X2ROOT . '/vendor/autoload.php';
 
 use Monolog\Handler\StreamHandler;
+use x2ts\log\AmqpHandler;
 use x2ts\log\TraceFormatter;
 
 /**
@@ -53,6 +54,24 @@ T::conf([
                     [
                         'class'     => StreamHandler::class,
                         'args'      => [X_RUNTIME_ROOT . '/logger2.log', X_LOG_NOTICE],
+                        'formatter' => new TraceFormatter(),
+                    ],
+                    [
+                        'class'     => AmqpHandler::class,
+                        'args'      => [[
+                            'amqp'          => [
+                                'host'            => 'rabbitmq',
+                                'port'            => 5672,
+                                'login'           => 'guest',
+                                'password'        => 'guest',
+                                'vhost'           => '/',
+                                'read_timeout'    => 30,
+                                'write_timeout'   => 30,
+                                'connect_timeout' => 30,
+                            ],
+                            'exchange_name' => 'log',
+                            'routing_key'   => '{channel}.{level}',
+                        ], X_LOG_DEBUG],
                         'formatter' => new TraceFormatter(),
                     ],
                 ],
