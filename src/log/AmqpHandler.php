@@ -41,17 +41,14 @@ class AmqpHandler extends AbstractProcessingHandler {
      * @throws \AMQPExchangeException
      */
     public function getAmqpExchange() {
-        if (!$this->connection instanceof \AMQPConnection) {
-            $this->connection = new \AMQPConnection($this->conf['amqp']);
-            $this->connection->connect();
-        }
-        if (!$this->connection->isConnected()) {
-            $this->connection->reconnect();
-        }
-        if (!$this->channel instanceof \AMQPChannel || !$this->channel->isConnected()) {
-            $this->channel = new \AMQPChannel($this->connection);
-        }
-        if (!$this->exchange instanceof \AMQPExchange || !$this->exchange->getChannel()->isConnected()) {
+        if (!$this->exchange instanceof \AMQPExchange) {
+            if (!$this->channel instanceof \AMQPChannel) {
+                if (!$this->connection instanceof \AMQPConnection) {
+                    $this->connection = new \AMQPConnection($this->conf['amqp']);
+                    $this->connection->connect();
+                }
+                $this->channel = new \AMQPChannel($this->connection);
+            }
             $this->exchange = new \AMQPExchange($this->channel);
             $this->exchange->setType(AMQP_EX_TYPE_TOPIC);
             $this->exchange->setName($this->conf['exchange_name']);
@@ -71,17 +68,18 @@ class AmqpHandler extends AbstractProcessingHandler {
      * @param  array $record
      *
      * @return void
-     * @throws \AMQPChannelException
-     * @throws \AMQPConnectionException
-     * @throws \AMQPExchangeException
      */
     protected function write(array $record) {
-        $message = $record['formatted'];
-        $routingKey = str_replace(
-            ['{channel}', '{level}'],
-            [$record['channel'], strtolower($record['level_name'])],
-            $this->conf['routing_key']
-        );
-        $this->getAmqpExchange()->publish($message, $routingKey, AMQP_NOPARAM, ['delivery_mode' => 2]);
+        try {
+            $message = $record['formatted'];
+            $routingKey = str_replace(
+                ['{channel}', '{level}'],
+                [$record['channel'], strtolower($record['level_name'])],
+                $this->conf['routing_key']
+            );
+            $this->getAmqpExchange()->publish($message, $routingKey, AMQP_NOPARAM, ['delivery_mode' => 2]);
+        } catch (\AMQPException $e) {
+            trigger_error($e->getMessage(), E_USER_WARNING);
+        }
     }
 }
