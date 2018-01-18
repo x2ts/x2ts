@@ -65,22 +65,4 @@ class LoggerTest extends TestCase {
         $this->getActualOutput();
         $this->expectOutputRegex("/\[warning\]\[\d+\]\[x2ts\\\\LoggerTest::testLoggerLevel\]hehe/");
     }
-
-    public function testAmqpLogger() {
-        $monitor = proc_open('php ' . __DIR__ . '/monitor.php', [
-            ['file', '/dev/zero', 'r'],
-            ['pipe', 'w'],
-            ['file', '/dev/null', 'w'],
-        ], $pipes, __DIR__);
-        sleep(1);
-        T::logger2()->notice('finger');
-        $output = fgets($pipes[1]);
-        self::assertRegExp("/\[notice\]\[\d+\]\[x2ts\\\\LoggerTest::testAmqpLogger\]finger/", $output);
-        T::logger2()->warn('www');
-        $output = fgets($pipes[1]);
-        self::assertRegExp("/\[warning\]\[\d+\]\[x2ts\\\\LoggerTest::testAmqpLogger\]www/", $output);
-        fclose($pipes[1]);
-        proc_terminate($monitor);
-        proc_close($monitor);
-    }
 }
