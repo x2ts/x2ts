@@ -2,7 +2,7 @@
   "name": "x2ts/x2ts",
   "description": "The core of x2ts framework.",
   "type": "library",
-  "license": "BSD",
+  "license": "BSD-3-Clause",
   "authors": [
     {
       "name": "TingSong-Syu",
