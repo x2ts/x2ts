@@ -15,7 +15,7 @@ use x2ts\Toolkit;
 
 class AmqpDelegateHandler extends SocketHandler {
     protected $conf = [
-        'sock'              => 'unix:///var/run/amqp/delegate.sock',
+        'sock'              => 'unix:///var/run/amqp-delegate.sock',
         'connectionTimeout' => 3,
         'writeTimeout'      => 10,
         'exchange'          => 'log',
@@ -30,7 +30,7 @@ class AmqpDelegateHandler extends SocketHandler {
     }
 
     protected function generateDataStream($record) {
-        $json = json_encode([
+        $packedMessage = msgpack_pack([
             'exchange'    => $this->conf['exchange'],
             'routing_key' => str_replace(
                 ['{channel}', '{level}'],
@@ -39,6 +39,6 @@ class AmqpDelegateHandler extends SocketHandler {
             ),
             'log'         => $record['formatted'],
         ]);
-        return pack('N', strlen($json)) . $json;
+        return pack('N', strlen($packedMessage)) . $packedMessage;
     }
 }
