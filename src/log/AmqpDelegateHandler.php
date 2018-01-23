@@ -31,13 +31,13 @@ class AmqpDelegateHandler extends SocketHandler {
 
     protected function generateDataStream($record) {
         $packedMessage = msgpack_pack([
-            'exchange'    => $this->conf['exchange'],
-            'routing_key' => str_replace(
+            'Exchange'   => $this->conf['exchange'],
+            'RoutingKey' => str_replace(
                 ['{channel}', '{level}'],
                 [$record['channel'], strtolower($record['level_name'])],
                 $this->conf['routingKey']
             ),
-            'log'         => $record['formatted'],
+            'Log'        => $record['formatted'],
         ]);
         return pack('N', strlen($packedMessage)) . $packedMessage;
     }
