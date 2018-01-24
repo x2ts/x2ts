@@ -41,4 +41,20 @@ class AmqpDelegateHandler extends SocketHandler {
         ]);
         return pack('N', strlen($packedMessage)) . $packedMessage;
     }
+
+    public function handle(array $record) {
+        try {
+            return parent::handle($record);
+        } catch (\Exception $e) {
+            trigger_error(sprintf(
+                "%s is thrown at %s(%d) with message: %s\nCall stack:\n%s",
+                get_class($e),
+                $e->getFile(),
+                $e->getLine(),
+                $e->getMessage(),
+                $e->getTraceAsString()
+            ), E_USER_WARNING);
+            return false;
+        }
+    }
 }
