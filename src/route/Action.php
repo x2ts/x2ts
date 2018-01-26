@@ -128,21 +128,23 @@ abstract class Action {
             'action'     => $this,
         ]));
         try {
-            X::bus()->dispatch(new PreRunEvent([
-                'dispatcher' => $this,
-                'action'     => $this,
-            ]));
-            $this->_run($args);
+            try {
+                X::bus()->dispatch(new PreRunEvent([
+                    'dispatcher' => $this,
+                    'action'     => $this,
+                ]));
+                $this->_run($args);
+            } catch (ApplicationExitException $e) {
+                if ($m = $e->getMessage()) {
+                    X::logger()->trace('App end with message ' . $m . "\n" . $e->getTraceAsString());
+                } else {
+                    X::logger()->trace('App end without message' . "\n" . $e->getTraceAsString());
+                }
+            }
             X::bus()->dispatch(new PostRunEvent([
                 'dispatcher' => $this,
                 'action'     => $this,
             ]));
-        } catch (ApplicationExitException $e) {
-            if ($m = $e->getMessage()) {
-                X::logger()->trace('App end with message ' . $e->getMessage() . "\n" . $e->getTraceAsString());
-            } else {
-                X::logger()->trace('App end without message' . "\n" . $e->getTraceAsString());
-            }
         } catch (Throwable $e) {
             X::logger()->error($e);
         }
