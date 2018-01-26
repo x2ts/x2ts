@@ -9,12 +9,19 @@
 namespace x2ts\route\event;
 
 
+use x2ts\DeprecatedException;
 use x2ts\event\Event;
 use x2ts\route\Action;
 
+/**
+ * Class PreActionEvent
+ *
+ * @package x2ts\route\event
+ * @deprecated
+ */
 class PreActionEvent extends Event {
     public static function name(): string {
-        return 'x2ts.route.PreAction';
+        throw new DeprecatedException('PreActionEvent is deprecated');
     }
 
     /**
@@ -28,6 +35,6 @@ class PreActionEvent extends Event {
             'action'     => null,
         ]
     ) {
-        parent::__construct($props);
+        throw new DeprecatedException('PreActionEvent is deprecated');
     }
 }

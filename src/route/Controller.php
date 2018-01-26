@@ -14,7 +14,6 @@ use Throwable;
 use x2ts\ComponentFactory as X;
 use x2ts\route\event\PostActionEvent;
 use x2ts\route\event\PostRunEvent;
-use x2ts\route\event\PreActionEvent;
 use x2ts\route\event\PreRunEvent;
 use x2ts\Toolkit;
 
@@ -24,10 +23,6 @@ abstract class Controller extends Action {
             . $this->server('REQUEST_METHOD') . ' '
             . $this->server('REQUEST_URI')
         );
-        X::bus()->dispatch(new PreActionEvent([
-            'dispatcher' => $this,
-            'action'     => $this,
-        ]));
         try {
             X::bus()->dispatch(new PreRunEvent([
                 'dispatcher' => $this,

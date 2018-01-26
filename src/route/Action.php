@@ -7,8 +7,8 @@ use ReflectionParameter;
 use Throwable;
 use x2ts\ComponentFactory as X;
 use x2ts\route\event\PostActionEvent;
+use x2ts\route\event\PostResponseEvent;
 use x2ts\route\event\PostRunEvent;
-use x2ts\route\event\PreActionEvent;
 use x2ts\route\event\PreRunEvent;
 use x2ts\route\http\Request;
 use x2ts\route\http\Response;
@@ -123,10 +123,6 @@ abstract class Action {
         X::logger()->trace('App Start: '
             . $this->server('REQUEST_METHOD') . ' ' . $this->server('REQUEST_URI')
         );
-        X::bus()->dispatch(new PreActionEvent([
-            'dispatcher' => $this,
-            'action'     => $this,
-        ]));
         try {
             try {
                 X::bus()->dispatch(new PreRunEvent([
@@ -153,14 +149,23 @@ abstract class Action {
             'action'     => $this,
         ]));
         $this->response->response();
+        X::bus()->dispatch(new PostResponseEvent([
+            'dispatcher' => $this,
+            'action'     => $this,
+        ]));
         X::logger()->trace('App Exit: '
             . $this->server('REQUEST_METHOD') . ' ' . $this->server('REQUEST_URI')
         );
     }
 
+    /**
+     * @param callable $callback
+     * @param null     $state
+     *
+     * @deprecated Since x2ts 2.8.0 Action do not dispatch PreActionEvent any more. Use PreRunEvent
+     */
     public function onPreAction(callable $callback, $state = null) {
-        X::bus()->on('x2ts.route.PreAction', $callback, $state);
-        return $this;
+        $this->onPreRun($callback, $state);
     }
 
     public function onPreRun(callable $callback, $state = null) {
@@ -175,6 +180,11 @@ abstract class Action {
 
     public function onPostAction(callable $callback, $state = null) {
         X::bus()->on('x2ts.route.PostAction', $callback, $state);
+        return $this;
+    }
+
+    public function onPostResponse(callable $callback, $state = null) {
+        X::bus()->on('x2ts.route.PostResponse', $callback, $state);
         return $this;
     }
 
