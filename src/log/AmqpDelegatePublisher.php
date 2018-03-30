@@ -73,7 +73,7 @@ class AmqpDelegatePublisher extends Component {
         $size = strlen($data);
         for ($sent = 0; $sent < $size && !feof($this->sock);) {
             if ($sent) {
-                $chunk = fwrite($this->sock, substr($data, $size));
+                $chunk = fwrite($this->sock, substr($data, $sent));
             } else {
                 $chunk = fwrite($this->sock, $data);
             }
